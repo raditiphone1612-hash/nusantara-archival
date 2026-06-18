@@ -130,7 +130,7 @@ const kamus = {
                         <div class="meta-section border-t border-white/10 pt-6">
                             <div>
                                 <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-1">Coverage (Daerah Asal)</span>
-                                <a href={`/koleksi?provinsi=${encodeURIComponent(motif['dc:coverage'])}&asal=detail_${motif['dc:identifier']}`} class="hover-text-alive text-sm text-gray-200 font-medium hover:text-[#c5a059] transition-colors underline decoration-white/20 hover:decoration-[#c5a059]/50 underline-offset-4 block w-fit">
+                                <a href={`${import.meta.env.BASE_URL}/koleksi?provinsi=${encodeURIComponent(motif['dc:coverage'])}&asal=detail_${motif['dc:identifier']}`} class="hover-text-alive text-sm text-gray-200 font-medium hover:text-[#c5a059] transition-colors underline decoration-white/20 hover:decoration-[#c5a059]/50 underline-offset-4 block w-fit">
                                     {motif['dc:coverage']}
                                 </a>
                             </div>
@@ -147,13 +147,13 @@ const kamus = {
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
                                     <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-1">Kategori Budaya</span>
-                                    <a href={`/koleksi?budaya=${encodeURIComponent(motif['dc:subject']['Kategori Budaya'])}&asal=detail_${motif['dc:identifier']}`} class="hover-text-alive text-sm text-gray-200 font-medium hover:text-[#c5a059] transition-colors underline decoration-white/20 hover:decoration-[#c5a059]/50 underline-offset-4 block w-fit">
+                                    <a href={`${import.meta.env.BASE_URL}/koleksi?budaya=${encodeURIComponent(motif['dc:subject']['Kategori Budaya'])}&asal=detail_${motif['dc:identifier']}`} class="hover-text-alive text-sm text-gray-200 font-medium hover:text-[#c5a059] transition-colors underline decoration-white/20 hover:decoration-[#c5a059]/50 underline-offset-4 block w-fit">
                                         {motif['dc:subject']['Kategori Budaya']}
                                     </a>
                                 </div>
                                 <div>
                                     <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-1">Status Simbolik</span>
-                                    <a href={`/koleksi?simbolik=${encodeURIComponent(motif['dc:subject']['Status Simbolik'])}&asal=detail_${motif['dc:identifier']}`} class="hover-text-alive text-sm text-red-400 font-serif italic hover:text-red-300 transition-colors underline decoration-red-400/30 hover:decoration-red-400/80 underline-offset-4 block w-fit">
+                                    <a href={`${import.meta.env.BASE_URL}/koleksi?simbolik=${encodeURIComponent(motif['dc:subject']['Status Simbolik'])}&asal=detail_${motif['dc:identifier']}`} class="hover-text-alive text-sm text-red-400 font-serif italic hover:text-red-300 transition-colors underline decoration-red-400/30 hover:decoration-red-400/80 underline-offset-4 block w-fit">
                                         {motif['dc:subject']['Status Simbolik']}
                                     </a>
                                 </div>
@@ -193,7 +193,7 @@ const kamus = {
                                     <div class="flex flex-wrap gap-2.5">
                                         <!-- Menampilkan Bulatan Warna sebagai Tautan Filter -->
                                         {warnaBulat.map(warna => (
-                                            <a href={`/koleksi?warna=${encodeURIComponent(warna.nama)}&asal=detail_${motif['dc:identifier']}`} class="hover-circle-alive w-8 h-8 rounded-full border-2 border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all cursor-pointer block" style={`background-color: ${warna.hex}; color: ${warna.hex};`} title={warna.nama}></a>
+                                            <a href={`${import.meta.env.BASE_URL}/koleksi?warna=${encodeURIComponent(warna.nama)}&asal=detail_${motif['dc:identifier']}`} class="hover-circle-alive w-8 h-8 rounded-full border-2 border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] transition-all cursor-pointer block" style={`background-color: ${warna.hex}; color: ${warna.hex};`} title={warna.nama}></a>
                                         ))}
                                     </div>
                                 </div>
@@ -247,7 +247,7 @@ const kamus = {
                                 </div>
                                 <div>
                                     <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-3">Format (Tipe File)</span>
-                                    <a href={`/koleksi?format=${encodeURIComponent(motif['dc:format'])}&asal=detail_${motif['dc:identifier']}`} class="hover-badge-alive arsip-format text-xs text-blue-300 bg-blue-900/20 px-3 py-1.5 rounded-full border border-blue-500/30 font-mono tracking-wider hover:bg-blue-800/40 hover:text-blue-200 transition-colors inline-block w-fit">
+                                    <a href={`${import.meta.env.BASE_URL}/koleksi?format=${encodeURIComponent(motif['dc:format'])}&asal=detail_${motif['dc:identifier']}`} class="hover-badge-alive arsip-format text-xs text-blue-300 bg-blue-900/20 px-3 py-1.5 rounded-full border border-blue-500/30 font-mono tracking-wider hover:bg-blue-800/40 hover:text-blue-200 transition-colors inline-block w-fit">
                                         {motif['dc:format']}
                                     </a>
                                     <div class="edu-block hidden mt-5 p-5 bg-[#111] border-l-4 border-[#a67c00] rounded-r-lg shadow-lg">
@@ -260,7 +260,7 @@ const kamus = {
                             <!-- DC:SOURCE -->
                             <div class="meta-section">
                                 <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-2">Source (Sumber Institusi)</span>
-                                <a href={`/koleksi?source=${encodeURIComponent(motif['dc:source'])}&asal=detail_${motif['dc:identifier']}`} class="hover-text-alive text-sm text-gray-200 font-medium italic hover:text-white transition-colors underline decoration-white/20 hover:decoration-white/80 underline-offset-4 block w-fit">
+                                <a href={`${import.meta.env.BASE_URL}/koleksi?source=${encodeURIComponent(motif['dc:source'])}&asal=detail_${motif['dc:identifier']}`} class="hover-text-alive text-sm text-gray-200 font-medium italic hover:text-white transition-colors underline decoration-white/20 hover:decoration-white/80 underline-offset-4 block w-fit">
                                     {motif['dc:source']}
                                 </a>
                                 <div class="edu-block hidden mt-4 p-5 bg-[#111] border-l-4 border-[#a67c00] rounded-r-lg shadow-lg">
@@ -273,7 +273,7 @@ const kamus = {
                             <div class="meta-section grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
                                     <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-2">Rights (Lisensi)</span>
-                                    <a href={`/koleksi?rights=${encodeURIComponent(motif['dc:rights'])}&asal=detail_${motif['dc:identifier']}`} class="hover-badge-alive text-sm text-green-400 font-medium flex items-center gap-2 bg-green-900/10 w-fit px-3 py-1.5 rounded-lg border border-green-500/20 hover:bg-green-800/30 hover:border-green-400/50 transition-colors">
+                                    <a href={`${import.meta.env.BASE_URL}/koleksi?rights=${encodeURIComponent(motif['dc:rights'])}&asal=detail_${motif['dc:identifier']}`} class="hover-badge-alive text-sm text-green-400 font-medium flex items-center gap-2 bg-green-900/10 w-fit px-3 py-1.5 rounded-lg border border-green-500/20 hover:bg-green-800/30 hover:border-green-400/50 transition-colors">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                                         {motif['dc:rights']}
                                     </a>
@@ -286,7 +286,7 @@ const kamus = {
                                     <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-3">Language (Bahasa)</span>
                                     <div class="flex flex-wrap gap-2">
                                         {motif['dc:language'].split(',').map(l => (
-                                            <a href={`/koleksi?language=${encodeURIComponent(l.trim())}&asal=detail_${motif['dc:identifier']}`} class="hover-badge-alive text-xs font-bold uppercase text-[#c5a059] bg-[#a67c00]/10 px-2.5 py-1 rounded border border-[#a67c00]/30 shadow-sm hover:bg-[#a67c00]/30 hover:text-white transition-colors block">
+                                            <a href={`${import.meta.env.BASE_URL}/koleksi?language=${encodeURIComponent(l.trim())}&asal=detail_${motif['dc:identifier']}`} class="hover-badge-alive text-xs font-bold uppercase text-[#c5a059] bg-[#a67c00]/10 px-2.5 py-1 rounded border border-[#a67c00]/30 shadow-sm hover:bg-[#a67c00]/30 hover:text-white transition-colors block">
                                                 {l.trim()}
                                             </a>
                                         ))}

@@ -2,6 +2,8 @@
 // src/components/home/RagamMotif.astro
 // @ts-nocheck
 import batikData from "../../data/metada_batik.json";
+import { sampelMotif } from '../../data/dublin_core_parsed.js';
+import '/src/styles/ragamMotif.css';
 
 // 1. Ambil seluruh data flat dari JSON
 const semuaMotif = Object.values(batikData).flat();
@@ -37,7 +39,7 @@ Object.keys(batikData).forEach(provinsi => {
 ---
 
 <script src="../../scripts/motifRotator.js"></script>
-<link rel="stylesheet" href="/src/styles/ragamMotif.css" />
+
 
 <div class="w-full max-w-4xl mx-auto px-4 py-8">
   {
