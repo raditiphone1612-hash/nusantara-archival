@@ -23,7 +23,7 @@ import ThemeToggle from "./ThemeToggle.astro";
 </button>
 
 <div class="fixed top-8 left-1/2 -translate-x-1/2" style="z-index: 100;">
-  <a href="/" class="flex flex-col items-center group no-underline">
+  <a href={`${import.meta.env.BASE_URL}/`} class="flex flex-col items-center group no-underline">
     <span
       class="logo-text text-white tracking-widest text-lg md:text-xl font-bold uppercase transition-colors group-hover:text-[#a67c00]"
     >
