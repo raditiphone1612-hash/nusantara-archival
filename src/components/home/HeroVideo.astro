@@ -15,7 +15,7 @@
       playsinline
       class="video-dark absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
     >
-      <source src="/assets/video/intro.mp4" type="video/mp4" />
+      <source src={`${import.meta.env.BASE_URL}/assets/video/intro.mp4`} type="video/mp4" />
     </video>
     
     <!-- Video Light Mode -->
@@ -26,7 +26,7 @@
       playsinline
       class="video-light absolute inset-0 w-full h-full object-cover select-none pointer-events-none"
     >
-      <source src="/assets/video/intro2.mp4" type="video/mp4" />
+      <source src={`${import.meta.env.BASE_URL}/assets/video/intro2.mp4`} type="video/mp4" />
     </video>
 
     <div class="absolute inset-0 v-museum-overlay transition-colors duration-1000"></div>

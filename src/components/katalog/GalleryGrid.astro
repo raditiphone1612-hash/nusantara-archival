@@ -135,7 +135,7 @@ function ekstrakWarnaTitik(stringWarna: string) {
                 >
                     <div class="w-full bg-[#050505] p-2 flex items-center justify-center overflow-hidden shrink-0 relative">
                         <img
-                            src={motif.url_gambar_web || "/assets/motif/default.jpg"}
+                            src={motif.url_gambar_web ? `${import.meta.env.BASE_URL}${motif.url_gambar_web}` : `${import.meta.env.BASE_URL}/assets/motif/default.jpg`}
                             alt={motif['dc:title']}
                             class="w-full h-auto object-cover opacity-90 hover:opacity-100 hover:scale-102 transition-all duration-500 ease-out rounded-xs"
                             loading="lazy"

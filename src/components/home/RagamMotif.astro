@@ -66,7 +66,7 @@ Object.keys(batikData).forEach(provinsi => {
                 <div class="w-full h-full relative overflow-hidden rounded-xs internal-card-container">
                   <div class="absolute inset-[11%] overflow-hidden z-10 flex items-center justify-center bg-black wadah-kain-dalam">
                     <img
-                      src={motif.Gambar || "/assets/motif/default.jpg"}
+                      src={motif.Gambar ? `${import.meta.env.BASE_URL}${motif.Gambar}` : `${import.meta.env.BASE_URL}/assets/motif/default.jpg`}
                       alt={motif.Nama}
                       class="w-full h-full object-cover opacity-85 img-kain-batik"
                     />
@@ -74,7 +74,7 @@ Object.keys(batikData).forEach(provinsi => {
 
                   <div class="absolute inset-0 pointer-events-none z-20 w-full h-full flex items-center justify-center">
                     <img
-                      src="/assets/border/border1.png"
+                      src={`${import.meta.env.BASE_URL}/assets/border/border1.png`}
                       alt="Frame Overlay"
                       class="w-full h-full object-contain style-bingkai-ragam scale-140"
                     />
