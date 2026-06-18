@@ -1,17 +1,207 @@
 ---
+// src/pages/index.astro
+import MainLayout from "../layouts/MainLayout.astro";
+import HeroSection from "../components/home/HeroVideo.astro";
+import RagamMotif from "../components/home/RagamMotif.astro";
+//import BukuGerbang from "../components/home/BukuGerbang.astro"; // Path folder home sudah presisi
+import batikData from "../data/metada_batik.json";
 
+// Mengambil masing-masing 5 motif pertama dari DIY & Jateng agar seimbang pas 10 data
+const previewJogja = batikData["DI Yogyakarta"]?.slice(0, 5) || [];
+const previewJateng = batikData["Jawa Tengah"]?.slice(0, 5) || [];
+
+// Menggabungkan data menjadi satu wadah array teaser katalog
+const kolesiTeaser = [...previewJogja, ...previewJateng];
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
+<html lang="id">
+  <MainLayout title="Beranda">
+    <HeroSection />
+
+    <section
+      id="gallery-teaser"
+      class="relative w-full min-h-screen bg-[#0a0a0a] pt-32 pb-24 px-8 md:px-16 z-30"
+    >
+      <div class="max-w-7xl mx-auto">
+        <div class="mb-16 text-center md:text-left">
+          <span
+            style="color: #c5a059;"
+            class="text-xs uppercase tracking-widest block mb-2 font-medium"
+          >
+            Curated Exhibition
+          </span>
+          <h2
+            class="text-3xl md:text-4xl font-serif text-[#e0e0e0] tracking-wide"
+          >
+            Koleksi Pilihan
+          </h2>
+          <div
+            style="width: 3rem; height: 1px; background-color: #c5a059;"
+            class="mt-4 mx-auto md:mx-0"
+          >
+          </div>
+        </div>
+
+        <div class="w-full flex justify-center">
+          <RagamMotif dataMetadata={kolesiTeaser} />
+        </div>
+
+        <div class="mt-20 text-center">
+          <a
+            href="/koleksi"
+            id="btn-arsip-lengkap"
+            style="border: 1px solid rgba(197, 160, 89, 0.4); color: #c5a059; letter-spacing: 0.25em;"
+            class="group inline-flex items-center gap-3 px-10 py-5 text-xs font-sans uppercase bg-transparent hover:bg-[#c5a059] hover:text-black transition-all duration-500 ease-out font-medium tracking-widest no-underline hover:scale-105 hover:shadow-[0_0_30px_rgba(197,160,89,0.4)]"
+          >
+            <span class="transition-transform duration-500 group-hover:-translate-x-1">Buka Seluruh Arsip Koleksi</span>
+            <span class="opacity-0 -translate-x-4 transition-all duration-500 group-hover:opacity-100 group-hover:translate-x-0 font-bold">→</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <audio id="audio-batik-ambient" loop src="/assets/audio/gambelan_hero.mp3"
+    ></audio>
+
+    <button
+      id="btn-audio-control"
+      class="fixed bottom-6 right-6 z-50 bg-[#141414]/90 text-white hover:text-[#c5a059] p-3.5 rounded-full border border-white/10 shadow-2xl backdrop-blur-md hover:bg-white hover:scale-110 hover:border-white/20 transition-all duration-300 flex items-center justify-center"
+      title="Kontrol Suara Suasana"
+    >
+      <svg
+        id="svg-speaker-icon"
+        xmlns="http://www.w3.org/2000/svg"
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path id="path-speaker-core" d="M11 5L6 9H2v6h4l5 4V5z"></path>
+        <g id="g-wave-lines"></g>
+      </svg>
+    </button>
+
+    <section
+      class="border-t border-white/5 bg-gradient-to-b from-transparent to-black/50"
+    >
+    </section>
+  </MainLayout>
 </html>
+
+<script>
+  import { initAudioHero, matikanAudioTotal } from "../scripts/audioHero.js";
+  import { initBukuGerbang } from "../scripts/bukuGerbang.js";
+
+  // 👑 CLEAN CODE FUNCTION: Satukan semua inisialisasi script dalam satu fungsi siklus agar eksekusi browser sinkron
+  function jalankanSistemBeranda() {
+    initAudioHero();
+    initBukuGerbang();
+  }
+
+  // Jalankan sistem secara aman baik saat pertama dimuat maupun saat transisi halaman Astro aktif
+  document.addEventListener("DOMContentLoaded", jalankanSistemBeranda);
+  document.addEventListener("astro:page-load", jalankanSistemBeranda);
+
+  // Kunci pengaman suara jika user bergeser keluar dari rute home
+  document.addEventListener("astro:before-preparation", matikanAudioTotal);
+</script>
+
+<style is:global>
+  /* ========================================================
+     ADAPTASI SPESIFIK HALAMAN UTAMA (Hero & Katalog Beranda)
+     ======================================================== */
+  
+  /* 1. Menimpa Background Gelap Bawaan Khusus Home */
+  html.light-mode .bg-\[\#0a0a0a\] { background-color: #f5f2ec !important; }
+  html.light-mode .bg-\[\#141414\]\/90 { background-color: rgba(255, 255, 255, 0.95) !important; }
+
+  /* 2. Menimpa Teks Terang Bawaan Khusus Home */
+  html.light-mode .text-\[\#e0e0e0\] { color: #2d2a26 !important; }
+
+  /* 3. Teks Hero Persis Dark Mode (Warna orisinal, tidak dipaksa seragam) */
+  html.light-mode .animate-fade-in-text h1 { color: #e0e0e0 !important; text-shadow: none !important; }
+  html.light-mode .animate-fade-in-text span[style*="color: #c5a059"] { color: #c5a059 !important; }
+  html.light-mode .animate-fade-in-text p[style*="rgba(224"] { color: rgba(224, 224, 224, 0.6) !important; }
+
+  /* 4. Teks Navbar Kontras di Light Mode (Adaptive Scroll khusus Beranda) */
+  html.light-mode:not(.scrolled-past-hero) .logo-text { color: #ffffff !important; transition: color 0.5s ease !important; }
+  html.light-mode:not(.scrolled-past-hero) .logo-subtext { color: #a67c00 !important; transition: color 0.5s ease !important; }
+  html.light-mode:not(.scrolled-past-hero) #menu-btn span { background-color: #ffffff !important; transition: background-color 0.5s ease !important; }
+  
+  html.light-mode:not(.scrolled-past-hero) .group:hover .logo-text { color: #a67c00 !important; }
+  html.light-mode:not(.scrolled-past-hero) #menu-btn:hover span { background-color: #a67c00 !important; }
+
+  /* 5. Menimpa Inline Styles pada Komponen Beranda Asli (Khusus di luar Hero) */
+  html.light-mode section:not(.h-screen) span[style*="color: #c5a059;"] { color: #8f6700 !important; }
+  html.light-mode div[style*="background-color: #c5a059;"] { background-color: #8f6700 !important; }
+
+  /* 6. Tombol 'Buka Seluruh Arsip Koleksi' */
+  html.light-mode #gallery-teaser a[style*="border: 1px solid rgba(197, 160, 89, 0.4)"] {
+      border-color: rgba(143, 103, 0, 0.4) !important;
+      color: #8f6700 !important;
+  }
+  html.light-mode #gallery-teaser a[style*="border: 1px solid rgba(197, 160, 89, 0.4)"]:hover {
+      background-color: #ebe4d8 !important;
+      color: #5c4100 !important;
+  }
+  html:not(.light-mode) #gallery-teaser a[style*="border: 1px solid rgba(197, 160, 89, 0.4)"]:hover {
+      background-color: rgba(197, 160, 89, 0.15) !important;
+      color: #c5a059 !important;
+      text-shadow: none !important;
+      border-color: #c5a059 !important;
+  }
+
+  /* 7. Kontrol Audio Button */
+  html.light-mode #btn-audio-control { color: #2d2a26 !important; border-color: #e6dfd1 !important; }
+  html.light-mode #btn-audio-control:hover { background-color: #ebe4d8 !important; color: #5c4100 !important; }
+  html.light-mode #btn-audio-control svg { stroke: #2d2a26 !important; }
+
+  /* 8. Gradient Pemisah Section Bawah */
+  html.light-mode .bg-gradient-to-b.from-transparent.to-black\/50 {
+      background-image: linear-gradient(to bottom, transparent, rgba(245, 242, 236, 1)) !important;
+      border-top-color: #e6dfd1 !important;
+  }
+
+  /* 9. Adaptasi Komponen Kartu (Ragam Motif) */
+  html.light-mode .museum-deck-wrapper[style*="background-color: rgba(18, 18, 18, 0.4)"] {
+      background-color: #ebe4d8 !important;
+      border-color: #d1c8b3 !important;
+      box-shadow: 0 10px 40px -10px rgba(92, 85, 77, 0.15) !important;
+  }
+  html.light-mode .img-kain-batik { opacity: 1 !important; }
+  html.light-mode #motif-link { border-color: rgba(143, 103, 0, 0.4) !important; color: #8f6700 !important; }
+  html.light-mode #motif-link:hover { background-color: #ebe4d8 !important; color: #5c4100 !important; border-color: #8f6700 !important; }
+
+  /* 10. Animasi Sorotan Tombol (Glow/Blink) */
+  @keyframes buttonGlowBlink {
+      0% { box-shadow: 0 0 0 rgba(197, 160, 89, 0); background-color: transparent; color: #c5a059; }
+      20% { box-shadow: 0 0 30px rgba(197, 160, 89, 0.8); background-color: rgba(197, 160, 89, 0.2); color: #fff; }
+      40% { box-shadow: 0 0 0 rgba(197, 160, 89, 0); background-color: transparent; color: #c5a059; }
+      60% { box-shadow: 0 0 30px rgba(197, 160, 89, 0.8); background-color: rgba(197, 160, 89, 0.2); color: #fff; }
+      100% { box-shadow: 0 0 0 rgba(197, 160, 89, 0); background-color: transparent; color: #c5a059; }
+  }
+
+  .blink-glow {
+      animation: buttonGlowBlink 2.5s ease-in-out;
+  }
+
+  /* 11. Animasi Ikon Audio / Speaker */
+  @keyframes wave-pulse {
+      0% { opacity: 0; transform: translateX(-2px) scaleY(0.8); }
+      50% { opacity: 1; transform: translateX(0) scaleY(1); }
+      100% { opacity: 0; transform: translateX(2px) scaleY(1.1); }
+  }
+  .animate-wave-1 { animation: wave-pulse 1.5s ease-in-out infinite; transform-origin: center; }
+  .animate-wave-2 { animation: wave-pulse 1.5s ease-in-out infinite 0.3s; transform-origin: center; }
+
+  @keyframes draw-cross {
+      0% { stroke-dasharray: 20; stroke-dashoffset: 20; }
+      100% { stroke-dasharray: 20; stroke-dashoffset: 0; }
+  }
+  .animate-mute-line { animation: draw-cross 0.4s ease-out forwards; }
+  .animate-mute-line-2 { animation: draw-cross 0.4s ease-out 0.2s forwards; stroke-dasharray: 20; stroke-dashoffset: 20; }
+</style>
