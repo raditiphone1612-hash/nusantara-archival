@@ -318,7 +318,8 @@ function setupSuperSearchAndFilters() {
                     if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.btn-kembali-cepat')) return;
                     if (idKainSekarang) {
                         const a = document.createElement('a');
-                        a.href = `/detail/${idKainSekarang}`; // Redirect back to detail page
+                        const base = window.BASE_URL || '';
+                        a.href = `${base}/detail/${idKainSekarang}`; // Redirect back to detail page
                         document.body.appendChild(a);
                         a.click();
                         document.body.removeChild(a);
@@ -337,11 +338,12 @@ function setupSuperSearchAndFilters() {
                             sessionStorage.setItem('sidebar_active_state_v2', 'false');
 
                             const a = document.createElement('a');
+                            const base = window.BASE_URL || '';
                             if (idAsalKain.startsWith('test_') || idAsalKain.startsWith('detail_')) {
                                 const idTarget = idAsalKain.replace('test_', '').replace('detail_', '');
-                                a.href = `/detail/${idTarget}`;
+                                a.href = `${base}/detail/${idTarget}`;
                             } else {
-                                a.href = `/detail/${idAsalKain}`;
+                                a.href = `${base}/detail/${idAsalKain}`;
                             }
                             document.body.appendChild(a);
                             a.click();

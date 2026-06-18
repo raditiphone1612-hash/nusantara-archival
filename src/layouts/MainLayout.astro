@@ -21,6 +21,10 @@ const { title } = Astro.props;
     <title>{title} | Nusantara Archival</title>
     <ClientRouter />
 
+    <script is:inline define:vars={{ base: import.meta.env.BASE_URL }}>
+      window.BASE_URL = base === '/' ? '' : base;
+    </script>
+
     <script is:inline>
       // Meneruskan state tema saat bernavigasi tanpa me-refresh halaman (Soft Navigation)
       // Jika di-refresh paksa (F5), ini tidak terpicu dan tag <html class="light-mode"> bawaan akan kembali memaksakan Light Mode.
