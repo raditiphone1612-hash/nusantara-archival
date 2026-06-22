@@ -1,0 +1,175 @@
+---
+// src/pages/testing-warna-jogja.astro
+import MainLayout from '../layouts/MainLayout.astro';
+import { getCollection } from 'astro:content';
+
+// Ambil semua data koleksi
+const semuaKoleksi = await getCollection('koleksi');
+
+// Filter hanya untuk DI Yogyakarta
+const koleksiJogja = semuaKoleksi.filter(
+    (motif) => motif.data.Provinsi === 'DI Yogyakarta'
+);
+
+// Fungsi ekstrak warna asli (3 warna) dari JSON
+const ekstrakWarnaAsli = (teksWarna) => {
+    if(!teksWarna) return [];
+    const results = [];
+    const regex = /([^,(]+?)\s*\((#[0-9a-fA-F]{6})\)/g;
+    let match;
+    while ((match = regex.exec(teksWarna)) !== null) {
+        results.push({
+            nama: match[1].trim(),
+            hex: match[2]
+        });
+    }
+    return results;
+};
+---
+
+<MainLayout title="Laboratorium Visual: Verifikasi Warna Jogja" description="Alat internal untuk menguji AI Color Extractor">
+    <main class="min-h-screen bg-[#0a0a0a] pt-28 pb-20 px-4 md:px-8">
+        <div class="max-w-7xl mx-auto">
+            <header class="mb-12 text-center">
+                <h1 class="text-3xl md:text-5xl font-bold text-white font-serif mb-4">
+                    Laboratorium <span class="text-[#a67c00]">Warna Visual</span>
+                </h1>
+                <p class="text-gray-400 max-w-2xl mx-auto">
+                    Menampilkan {koleksiJogja.length} motif dari DI Yogyakarta. Halaman ini akan mengekstrak warna dominan secara langsung dari gambar menggunakan algoritma AI di peramban Anda untuk dibandingkan secara manual.
+                </p>
+            </header>
+
+            <div class="grid grid-cols-1 gap-8">
+                {koleksiJogja.map((motif, index) => {
+                    const warnaAsli = ekstrakWarnaAsli(motif.data['dc:description']['Warna Dominan']);
+                    return (
+                        <div class="bg-[#111] border border-white/10 rounded-xl p-4 md:p-6 flex flex-col lg:flex-row gap-6 items-center lg:items-start shadow-xl">
+                            
+                            {/* Kolom 1: Gambar */}
+                            <div class="w-full lg:w-[300px] shrink-0">
+                                <div class="bg-black border border-white/5 rounded-lg overflow-hidden relative">
+                                    <img 
+                                        src={`${import.meta.env.BASE_URL}${motif.data.url_gambar_web}`} 
+                                        alt={motif.data['dc:title']}
+                                        class="target-image w-full h-[250px] object-cover transition-transform hover:scale-110 duration-500 cursor-zoom-in"
+                                        crossorigin="anonymous"
+                                        data-index={index}
+                                    />
+                                    <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+                                        <h3 class="text-white font-bold text-sm truncate">{motif.data['dc:title']}</h3>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Kolom 2: Warna Asli (Database) */}
+                            <div class="flex-1 w-full bg-black/40 rounded-lg border border-white/5 p-5">
+                                <h4 class="text-[10px] uppercase tracking-widest text-gray-500 font-bold mb-4 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                    Warna Database Saat Ini
+                                </h4>
+                                <div class="flex flex-wrap gap-3">
+                                    {warnaAsli.map(w => (
+                                        <div class="flex items-center gap-2 bg-[#1a1a1a] border border-white/10 px-3 py-2 rounded-md">
+                                            <div class="w-6 h-6 rounded-sm shadow-sm border border-white/20" style={`background-color: ${w.hex}`}></div>
+                                            <div>
+                                                <div class="text-xs font-bold text-gray-300 capitalize">{w.nama}</div>
+                                                <div class="text-[10px] font-mono text-gray-500">{w.hex}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    {warnaAsli.length === 0 && <span class="text-xs text-red-400">Tidak ada data warna</span>}
+                                </div>
+                            </div>
+
+                            {/* Kolom 3: Warna Baru AI */}
+                            <div class="flex-1 w-full bg-[#1a1a1a]/80 rounded-lg border border-[#a67c00]/30 p-5 relative">
+                                <h4 class="text-[10px] uppercase tracking-widest text-[#a67c00] font-bold mb-4 flex items-center gap-2">
+                                    <span class="w-2 h-2 rounded-full bg-[#a67c00] animate-pulse"></span>
+                                    Ekstraksi AI (Real-Time)
+                                </h4>
+                                
+                                <div id={`ai-colors-${index}`} class="flex flex-wrap gap-3 relative min-h-[60px]">
+                                    {/* Loader state */}
+                                    <div class="ai-loader absolute inset-0 flex items-center gap-2 text-xs text-gray-500 font-mono">
+                                        <div class="w-4 h-4 border-2 border-[#a67c00] border-t-transparent rounded-full animate-spin"></div>
+                                        Membedah Piksel...
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    </main>
+
+    {/* Impor library ColorThief */}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js" is:inline></script>
+    
+    <script is:inline>
+        // Tunggu hingga seluruh gambar dimuat, lalu jalankan AI
+        document.addEventListener('DOMContentLoaded', () => {
+            const colorThief = new ColorThief();
+            const images = document.querySelectorAll('.target-image');
+
+            const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+
+            images.forEach(img => {
+                const index = img.getAttribute('data-index');
+                const container = document.getElementById(`ai-colors-${index}`);
+                
+                const extractColors = () => {
+                    try {
+                        // Ambil palet 5 warna dominan (tanpa batasan kaku 3)
+                        const palette = colorThief.getPalette(img, 5);
+                        
+                        // Hapus loader
+                        const loader = container.querySelector('.ai-loader');
+                        if(loader) loader.remove();
+
+                        // Render warna
+                        palette.forEach(rgb => {
+                            const hex = rgbToHex(rgb[0], rgb[1], rgb[2]);
+                            
+                            const colorBox = document.createElement('div');
+                            colorBox.className = "flex items-center gap-2 bg-black/60 border border-[#a67c00]/40 px-3 py-2 rounded-md hover:border-[#a67c00] transition-colors cursor-crosshair";
+                            colorBox.title = `Klik untuk menyalin kode ${hex}`;
+                            
+                            colorBox.innerHTML = `
+                                <div class="w-6 h-6 rounded-sm shadow-sm border border-white/20" style="background-color: ${hex}"></div>
+                                <div>
+                                    <div class="text-[10px] font-mono font-bold text-[#deff9a]">${hex}</div>
+                                    <div class="text-[9px] text-gray-500">rgb(${rgb[0]},${rgb[1]},${rgb[2]})</div>
+                                </div>
+                            `;
+
+                            // Fitur klik untuk copy
+                            colorBox.addEventListener('click', () => {
+                                navigator.clipboard.writeText(hex);
+                                const originalHtml = colorBox.innerHTML;
+                                colorBox.innerHTML = `<div class="text-[10px] text-green-400 font-bold px-4 py-1">Tersalin!</div>`;
+                                setTimeout(() => { colorBox.innerHTML = originalHtml; }, 1000);
+                            });
+
+                            container.appendChild(colorBox);
+                        });
+                    } catch (e) {
+                        console.error('Error mengekstrak warna:', e);
+                        container.innerHTML = '<span class="text-xs text-red-400">Gagal mengekstrak</span>';
+                    }
+                };
+
+                // Jika gambar sudah selesai dimuat (cache)
+                if (img.complete) {
+                    extractColors();
+                } else {
+                    img.addEventListener('load', extractColors);
+                }
+            });
+        });
+    </script>
+</MainLayout>
