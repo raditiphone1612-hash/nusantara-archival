@@ -9,11 +9,11 @@ import FilterSidebar from "../components/katalog/FilterSidebar.astro";
 // Import CSS khusus koleksi
 import "../styles/koleksi.css";
 
-// 1. Ekstrak Data Dublin Core Baru
-import dublinCoreData from "../data/dublin_core.json";
+import { getCollection } from 'astro:content';
 
 // Gabungkan data
-const semuaMotif = Array.isArray(dublinCoreData) ? dublinCoreData : Object.values(dublinCoreData).flat();
+const koleksi = await getCollection('koleksi');
+const semuaMotif = koleksi.map(k => k.data);
 const sampelMotif = semuaMotif.filter(motif => motif && motif['dc:identifier'] && motif['dc:title']);
 const totalSemua = sampelMotif.length;
 

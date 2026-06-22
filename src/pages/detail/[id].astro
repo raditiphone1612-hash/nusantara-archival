@@ -4,13 +4,13 @@
 // @ts-nocheck
 import MainLayout from "../../layouts/MainLayout.astro";
 import "../../styles/detail-motif.css";
-import dublinCoreData from "../../data/dublin_core.json";
+import { getCollection } from 'astro:content';
 
 export async function getStaticPaths() {
-    const semuaMotif = Array.isArray(dublinCoreData) ? dublinCoreData : Object.values(dublinCoreData).flat();
-    return semuaMotif.map((motif) => ({
-        params: { id: motif['dc:identifier'] },
-        props: { motif },
+    const koleksi = await getCollection('koleksi');
+    return koleksi.map((motif) => ({
+        params: { id: motif.data['dc:identifier'] },
+        props: { motif: motif.data },
     }));
 }
 

@@ -1,12 +1,17 @@
 ---
 // src/components/home/RagamMotif.astro
 // @ts-nocheck
-import batikData from "../../data/metada_batik.json";
-import { sampelMotif } from '../../data/dublin_core_parsed.js';
+import { getCollection } from 'astro:content';
 import '/src/styles/ragamMotif.css';
 
-// 1. Ambil seluruh data flat dari JSON
-const semuaMotif = Object.values(batikData).flat();
+const koleksi = await getCollection('koleksi');
+const semuaMotif = koleksi.map(k => ({
+  ID: k.data['dc:identifier'],
+  Nama: k.data['dc:title'],
+  Provinsi: k.data['dc:coverage'] ? k.data['dc:coverage'].replace(', Indonesia', '') : '-',
+  "Makna Filosofis": k.data['dc:description'] ? k.data['dc:description']['Makna Filosofis'] : '',
+  Gambar: k.data['url_gambar_web']
+}));
 
 // 2. Saring data murni per provinsi pilihan (Misal: 5 dari Yogyakarta & 5 dari Jawa Tengah)
 const limaYogyakarta = semuaMotif
@@ -31,11 +36,11 @@ const motifAwal = sepuluhMotifPilihan[0] || {
   "Makna Filosofis": "Belum ada data metadata yang terbaca.",
 };
 
-// 4. Hitung total motif per provinsi untuk tooltip interaktif
-const jumlahPerProvinsi = {};
-Object.keys(batikData).forEach(provinsi => {
-  jumlahPerProvinsi[provinsi] = batikData[provinsi].length;
-});
+const jumlahPerProvinsi = semuaMotif.reduce((acc, motif) => {
+  const prov = motif.Provinsi !== '-' ? motif.Provinsi : 'Lainnya';
+  acc[prov] = (acc[prov] || 0) + 1;
+  return acc;
+}, {});
 ---
 
 <script src="../../scripts/motifRotator.js"></script>
