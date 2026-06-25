@@ -1,5 +1,6 @@
 ---
 // src/components/katalog/TestFilterSidebar.astro
+// Cache-bust: 1
 const { 
     provinsiCounts, 
     budayaCounts, 
@@ -14,8 +15,16 @@ const {
 
 <div
     id="wrapper-sidebar"
-    class="w-0 opacity-0 overflow-hidden border-0 p-0 m-0 bg-[#121212] border-[#c5a059]/10 rounded-xs md:sticky md:top-28 flex flex-col gap-8 shadow-xl transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+    class="w-full md:w-1/4 px-6 pt-6 border border-[#c5a059]/10 bg-[#121212] rounded-xs md:sticky md:top-28 shadow-xl transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)]"
 >
+    <!-- TOMBOL TOGGLE SIDEBAR UTAMA -->
+    <button id="btn-toggle-sidebar" type="button" class="w-full flex items-center justify-between py-2 border-y border-gray-800 text-gray-500 hover:text-[#c5a059] transition-colors cursor-pointer group mb-6">
+        <span class="text-[10px] uppercase tracking-[0.2em] font-bold" id="teks-toggle-filter">Filter Arsip Spesifik</span>
+        <span id="icon-toggle-filter" class="text-xl font-mono leading-none transition-transform duration-300 group-hover:rotate-90">-</span>
+    </button>
+
+    <div id="sidebar-content-accordion" class="w-full grid" style="grid-template-rows: 1fr; opacity: 1; transition: grid-template-rows 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease;">
+        <div class="overflow-hidden flex flex-col gap-8 w-full pb-56">
     <!-- 1. Wilayah (Coverage) -->
     <div class="relative filter-group shrink-0 w-full">
         <label
@@ -154,7 +163,7 @@ const {
         <div id="pills-warna" class="flex flex-wrap gap-2 mb-3 empty:hidden">
         </div>
         <button id="btn-select-warna" class="custom-select-trigger">
-            <span class="text-gray-400">Pilih Warna (Maks 3)</span>
+            <span class="text-gray-400">Pilih Warna (Maks 6)</span>
             <svg
                 class="panah-icon"
                 width="18"
@@ -173,23 +182,23 @@ const {
             >
                 <span class="teks-opsi text-[#c5a059]">Bersihkan Warna</span>
             </button>
-            <div class="grid grid-cols-2 gap-1 mt-2">
+            <div class="grid grid-cols-3 gap-1 mt-2">
                 {
                     Object.keys(pemetaWarna).map((name) => (
                         <button
-                            class="baris-opsi !px-3 !py-2 hover:bg-white/5 rounded-xs"
+                            class="baris-opsi !px-3 !py-2 hover:bg-white/5 rounded-xs flex items-center justify-between"
                             data-kategori="warna"
                             data-target={name}
                             data-hex={pemetaWarna[name]}
+                            title={name}
                         >
-                            <div class="flex items-center gap-2 max-w-full">
+                            <div class="flex items-center">
                                 <div
-                                    class="w-3.5 h-3.5 rounded-full shrink-0 shadow-sm border border-white/10"
+                                    class="w-4 h-4 rounded-full shrink-0 shadow-sm border border-white/20"
                                     style={`background-color: ${pemetaWarna[name]}`}
                                 />
-                                <span class="teks-opsi text-[11px] truncate">{name}</span>
                             </div>
-                            <span class="angka-opsi" style="display: none;">0</span>
+                            <span class="angka-opsi">0</span>
                         </button>
                     ))
                 }
@@ -204,11 +213,12 @@ const {
     </button>
 
     <!-- WADAH ARSIP TEKNIS -->
-    <div id="wadah-arsip-teknis" class="hidden flex-col gap-6 w-full">
+    <div id="wadah-arsip-teknis" class="w-full grid" style="grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s ease;">
+        <div class="overflow-hidden flex flex-col gap-6 w-full">
 
     <!-- 5. Format -->
     <div class="relative filter-group shrink-0 w-full">
-        <label class="text-blue-400 text-[11px] uppercase tracking-[0.2em] font-bold block mb-3">Format File</label>
+        <label class="text-[#c5a059] text-[11px] uppercase tracking-[0.2em] font-bold block mb-3">Format File</label>
         <div id="pills-format" class="flex flex-wrap gap-2 mb-3 empty:hidden"></div>
         <button id="btn-select-format" class="custom-select-trigger">
             <span class="text-gray-400">Pilih Format</span>
@@ -216,7 +226,7 @@ const {
         </button>
         <div id="opsi-format" class="custom-options-box hidden">
             <button class="baris-opsi" data-kategori="format" data-target="semua">
-                <span class="teks-opsi text-blue-400">Bersihkan Format</span>
+                <span class="teks-opsi text-[#c5a059]">Bersihkan Format</span>
             </button>
             {Object.keys(formatCounts).map(name => (
                 <button class="baris-opsi" data-kategori="format" data-target={name}>
@@ -229,7 +239,7 @@ const {
 
     <!-- 6. Rights (Lisensi) -->
     <div class="relative filter-group shrink-0 w-full">
-        <label class="text-green-400 text-[11px] uppercase tracking-[0.2em] font-bold block mb-3">Rights (Lisensi)</label>
+        <label class="text-[#c5a059] text-[11px] uppercase tracking-[0.2em] font-bold block mb-3">Rights (Lisensi)</label>
         <div id="pills-rights" class="flex flex-wrap gap-2 mb-3 empty:hidden"></div>
         <button id="btn-select-rights" class="custom-select-trigger">
             <span class="text-gray-400">Pilih Lisensi</span>
@@ -237,7 +247,7 @@ const {
         </button>
         <div id="opsi-rights" class="custom-options-box hidden">
             <button class="baris-opsi" data-kategori="rights" data-target="semua">
-                <span class="teks-opsi text-green-400">Bersihkan Lisensi</span>
+                <span class="teks-opsi text-[#c5a059]">Bersihkan Lisensi</span>
             </button>
             {Object.keys(rightsCounts).map(name => (
                 <button class="baris-opsi" data-kategori="rights" data-target={name}>
@@ -271,7 +281,7 @@ const {
 
     <!-- 8. Source (Institusi) -->
     <div class="relative filter-group shrink-0 w-full">
-        <label class="text-gray-300 text-[11px] uppercase tracking-[0.2em] font-bold block mb-3">Source (Institusi)</label>
+        <label class="text-[#c5a059] text-[11px] uppercase tracking-[0.2em] font-bold block mb-3">Source (Institusi)</label>
         <div id="pills-source" class="flex flex-wrap gap-2 mb-3 empty:hidden"></div>
         <button id="btn-select-source" class="custom-select-trigger">
             <span class="text-gray-400">Pilih Institusi</span>
@@ -279,7 +289,7 @@ const {
         </button>
         <div id="opsi-source" class="custom-options-box hidden">
             <button class="baris-opsi" data-kategori="source" data-target="semua">
-                <span class="teks-opsi text-white">Bersihkan Institusi</span>
+                <span class="teks-opsi text-[#c5a059]">Bersihkan Institusi</span>
             </button>
             {Object.keys(sourceCounts).map(name => (
                 <button class="baris-opsi" data-kategori="source" data-target={name}>
@@ -291,5 +301,39 @@ const {
     </div>
 
     </div>
-
+    </div>
+    </div>
 </div>
+
+<style is:global>
+    /* Animasi Staggered Waterfall untuk Filter Sidebar dan Arsip Teknis */
+    #sidebar-content-accordion > div > .filter-group,
+    #wadah-arsip-teknis > div > .filter-group {
+        opacity: 0;
+        transform: translateY(20px);
+        transition: opacity 0.5s cubic-bezier(0.25, 1, 0.5, 1), transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    }
+    
+    #sidebar-content-accordion.is-active > div > .filter-group,
+    #wadah-arsip-teknis.is-active > div > .filter-group {
+        opacity: 1;
+        transform: none;
+    }
+
+    /* Stagger untuk Sidebar Utama */
+    #sidebar-content-accordion.is-active > div > .filter-group:nth-child(1) { transition-delay: 100ms; }
+    #sidebar-content-accordion.is-active > div > .filter-group:nth-child(2) { transition-delay: 175ms; }
+    #sidebar-content-accordion.is-active > div > .filter-group:nth-child(3) { transition-delay: 250ms; }
+    #sidebar-content-accordion.is-active > div > .filter-group:nth-child(4) { transition-delay: 325ms; }
+    #sidebar-content-accordion.is-active > div > .filter-group:nth-child(5) { transition-delay: 400ms; }
+    #sidebar-content-accordion.is-active > div > .filter-group:nth-child(6) { transition-delay: 475ms; }
+    #sidebar-content-accordion.is-active > div > .filter-group:nth-child(7) { transition-delay: 550ms; }
+    #sidebar-content-accordion.is-active > div > .filter-group:nth-child(8) { transition-delay: 625ms; }
+    #sidebar-content-accordion.is-active > div > .filter-group:nth-child(9) { transition-delay: 700ms; }
+
+    /* Stagger untuk Arsip Teknis */
+    #wadah-arsip-teknis.is-active > div > .filter-group:nth-child(1) { transition-delay: 50ms; }
+    #wadah-arsip-teknis.is-active > div > .filter-group:nth-child(2) { transition-delay: 125ms; }
+    #wadah-arsip-teknis.is-active > div > .filter-group:nth-child(3) { transition-delay: 200ms; }
+    #wadah-arsip-teknis.is-active > div > .filter-group:nth-child(4) { transition-delay: 275ms; }
+</style>

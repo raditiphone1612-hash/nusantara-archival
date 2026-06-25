@@ -103,7 +103,12 @@ const kamus = {
                     <!-- KOLOM KIRI (GAMBAR TETAP) -->
                     <div class="w-full md:w-[280px] shrink-0 sticky top-24 mx-auto md:mx-0 flex flex-col gap-5">
                         <div id="main-image-trigger" class="relative w-[280px] h-[280px] bg-black border border-white/10 rounded-xl overflow-hidden shadow-[0_0_50px_rgba(166,124,0,0.15)] group cursor-zoom-in" style="background-color: #000000 !important;">
-                            <img src={`${import.meta.env.BASE_URL}${motif.url_gambar_web}`} alt={motif['dc:title']} class="w-full h-full object-cover opacity-95 transition-transform duration-500 ease-out group-hover:scale-105" />
+                            <img 
+                                src={`${import.meta.env.BASE_URL}${motif.url_gambar_web}`} 
+                                alt={motif['dc:title']} 
+                                class="w-full h-full object-cover opacity-95 transition-transform duration-500 ease-out group-hover:scale-105" 
+                                transition:name={`img-${motif['dc:identifier'].replace(/[^a-zA-Z0-9-]/g, '')}`}
+                            />
                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center pointer-events-none" style="background-color: rgba(0,0,0,0.4) !important;">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-white/80 drop-shadow-lg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                             </div>
@@ -116,7 +121,10 @@ const kamus = {
                         
                         <!-- TITLE SECTION -->
                         <div class="meta-section">
-                            <h1 class="text-3xl md:text-5xl font-bold font-['Playfair_Display'] text-white drop-shadow-lg leading-tight mb-2">
+                            <h1 
+                                class="text-3xl md:text-5xl font-bold font-['Playfair_Display'] text-white drop-shadow-lg leading-tight mb-2"
+                                transition:name={`title-${motif['dc:identifier'].replace(/[^a-zA-Z0-9-]/g, '')}`}
+                            >
                                 {motif['dc:title']}
                             </h1>
                             <!-- Edukasi Block -->
@@ -285,11 +293,27 @@ const kamus = {
                                 <div>
                                     <span class="text-[10px] text-gray-500 uppercase tracking-widest font-bold block mb-3">Language (Bahasa)</span>
                                     <div class="flex flex-wrap gap-2">
-                                        {motif['dc:language'].split(',').map(l => (
-                                            <a href={`${import.meta.env.BASE_URL}/koleksi?language=${encodeURIComponent(l.trim())}&asal=detail_${motif['dc:identifier']}`} class="hover-badge-alive text-xs font-bold uppercase text-[#c5a059] bg-[#a67c00]/10 px-2.5 py-1 rounded border border-[#a67c00]/30 shadow-sm hover:bg-[#a67c00]/30 hover:text-white transition-colors block">
-                                                {l.trim()}
-                                            </a>
-                                        ))}
+                                        {motif['dc:language'].split(',').map(l => {
+                                            const lang = l.trim();
+                                            if (lang.toLowerCase() === 'id') {
+                                                return (
+                                                    <span 
+                                                        class="text-xs font-bold uppercase text-[#c5a059]/70 bg-[#a67c00]/5 px-2.5 py-1 rounded border border-[#a67c00]/20 shadow-sm block cursor-default"
+                                                        title="Bahasa default (tidak tersedia sebagai filter)"
+                                                    >
+                                                        {lang}
+                                                    </span>
+                                                );
+                                            }
+                                            return (
+                                                <a 
+                                                    href={`${import.meta.env.BASE_URL}/koleksi?language=${encodeURIComponent(lang)}&asal=detail_${motif['dc:identifier']}`} 
+                                                    class="hover-badge-alive text-xs font-bold uppercase text-[#c5a059] bg-[#a67c00]/10 px-2.5 py-1 rounded border border-[#a67c00]/30 shadow-sm hover:bg-[#a67c00]/30 hover:text-white transition-colors block"
+                                                >
+                                                    {lang}
+                                                </a>
+                                            );
+                                        })}
                                     </div>
                                     <div class="edu-block hidden mt-5 p-5 bg-[#111] border-l-4 border-[#a67c00] rounded-r-lg shadow-lg">
                                         <h4 class="text-xs font-bold text-[#a67c00] uppercase tracking-widest mb-2">{kamus.language.judul}</h4>
@@ -312,18 +336,31 @@ const kamus = {
                 </div>
 
                 <!-- Kontrol Zoom & Tutup di Bawah -->
-                <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-6 bg-[#1a1a1a]/90 backdrop-blur-xl px-8 py-4 rounded-full border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
+                <div class="absolute bottom-10 left-1/2 -translate-x-1/2 flex items-center gap-4 bg-[#1a1a1a]/90 backdrop-blur-xl px-6 py-4 rounded-full border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.5)]">
                     
+                    <!-- Rotate Left -->
+                    <button id="btn-rotate-left" class="text-white/60 hover:text-[#a67c00] transition-colors p-2" title="Putar Kiri">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                    </button>
+
+                    <!-- Reset -->
+                    <button id="btn-reset" class="text-white/60 hover:text-[#a67c00] transition-colors p-2" title="Kembalikan Semula">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                    </button>
+
+                    <!-- Rotate Right -->
+                    <button id="btn-rotate-right" class="text-white/60 hover:text-[#a67c00] transition-colors p-2" title="Putar Kanan">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 scale-x-[-1]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
+                    </button>
+
+                    <div class="w-[1px] h-6 bg-white/20 mx-1"></div>
                     <!-- Zoom Out -->
-                    <button id="btn-zoom-out" class="text-white/60 hover:text-[#a67c00] transition-colors p-2" title="Perkecil">
+                    <button id="btn-zoom-out" class="text-white/60 hover:text-[#a67c00] transition-colors p-2 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:text-white/60" title="Perkecil">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" /></svg>
                     </button>
-                    
-                    <!-- Zoom Slider -->
-                    <input type="range" id="zoom-slider" min="0.5" max="3" step="0.1" value="1" class="w-40 md:w-64 accent-[#a67c00] cursor-pointer" />
 
                     <!-- Zoom In -->
-                    <button id="btn-zoom-in" class="text-white/60 hover:text-[#a67c00] transition-colors p-2" title="Perbesar">
+                    <button id="btn-zoom-in" class="text-white/60 hover:text-[#a67c00] transition-colors p-2 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:text-white/60" title="Perbesar">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7" /></svg>
                     </button>
 
@@ -474,11 +511,29 @@ const kamus = {
             const btnEdukasi = document.getElementById('toggle-edukasi');
             if (!btnEdukasi) return; // Mencegah error jika fungsi terpanggil di halaman lain
             
+            // PREPARE SMOOTH ACCORDION UNTUK SEMUA EDU-BLOCK (Tanpa ubah struktur HTML!)
+            const eduBlocks = document.querySelectorAll('.edu-block');
+            eduBlocks.forEach(el => {
+                el.classList.remove('hidden'); // Hilangkan hidden bawaan
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'grid grid-rows-[0fr] transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]';
+                
+                const inner = document.createElement('div');
+                inner.className = 'overflow-hidden opacity-0 translate-y-[-10px] transition-all duration-700 ease-[cubic-bezier(0.4,0,0.2,1)]';
+                
+                el.parentNode.insertBefore(wrapper, el);
+                inner.appendChild(el);
+                wrapper.appendChild(inner);
+                
+                el._wrapper = wrapper;
+                el._inner = inner;
+            });
+            
             let isEdukasiActive = false;
 
             btnEdukasi.addEventListener('click', () => {
                 isEdukasiActive = !isEdukasiActive;
-                const eduBlocks = document.querySelectorAll('.edu-block');
                 const toggleIcon = document.getElementById('toggle-icon');
                 const toggleText = document.getElementById('toggle-text');
                 
@@ -492,9 +547,12 @@ const kamus = {
                     btnEdukasi.classList.add('bg-[#a67c00]/30', 'border-[#a67c00]', 'text-white');
                     btnEdukasi.classList.remove('text-[#c5a059]', 'bg-[#a67c00]/10', 'border-[#a67c00]/30');
                     
+                    // Mainkan Animasi Slide Down & Fade In
                     eduBlocks.forEach(el => {
-                        el.classList.remove('hidden');
-                        el.classList.add('animate-[fadeInScale_0.3s_ease]');
+                        el._wrapper.classList.remove('grid-rows-[0fr]');
+                        el._wrapper.classList.add('grid-rows-[1fr]');
+                        el._inner.classList.remove('opacity-0', 'translate-y-[-10px]');
+                        el._inner.classList.add('opacity-100', 'translate-y-0');
                     });
                 } else {
                     if(toggleIcon) {
@@ -506,9 +564,12 @@ const kamus = {
                     btnEdukasi.classList.remove('bg-[#a67c00]/30', 'border-[#a67c00]', 'text-white');
                     btnEdukasi.classList.add('text-[#c5a059]', 'bg-[#a67c00]/10', 'border-[#a67c00]/30');
                     
+                    // Mainkan Animasi Slide Up & Fade Out
                     eduBlocks.forEach(el => {
-                        el.classList.add('hidden');
-                        el.classList.remove('animate-[fadeInScale_0.3s_ease]');
+                        el._wrapper.classList.remove('grid-rows-[1fr]');
+                        el._wrapper.classList.add('grid-rows-[0fr]');
+                        el._inner.classList.remove('opacity-100', 'translate-y-0');
+                        el._inner.classList.add('opacity-0', 'translate-y-[-10px]');
                     });
                 }
             });
@@ -529,10 +590,8 @@ const kamus = {
                     arsipIcon.classList.add('rotate-180');
                     btnArsip.classList.add('bg-[#a67c00]/10', 'border-[#a67c00]/50');
 
-                    if(isEdukasiActive) {
-                        const newBlocks = arsipContainer.querySelectorAll('.edu-block');
-                        newBlocks.forEach(el => el.classList.remove('hidden'));
-                    }
+                    // Hapus baris ini karena edu-blocks otomatis mengatur ukurannya melalui _wrapper
+                    // dan visibilitasnya dipertahankan dari isEdukasiActive.
                 } else {
                     arsipContainer.classList.add('hidden');
                     arsipContainer.classList.remove('flex', 'animate-[fadeIn_0.5s_ease]');
@@ -548,28 +607,35 @@ const kamus = {
             const viewer = document.getElementById('image-viewer');
             const mainImageTrigger = document.getElementById('main-image-trigger');
             const fullImage = document.getElementById('full-image');
-            const zoomSlider = document.getElementById('zoom-slider');
             const btnZoomIn = document.getElementById('btn-zoom-in');
             const btnZoomOut = document.getElementById('btn-zoom-out');
+            const btnRotateLeft = document.getElementById('btn-rotate-left');
+            const btnRotateRight = document.getElementById('btn-rotate-right');
+            const btnReset = document.getElementById('btn-reset');
             const btnCloseViewer = document.getElementById('btn-close-viewer');
             const panContainer = document.getElementById('image-pan-container');
 
             let scale = 1;
             let translateX = 0;
             let translateY = 0;
+            let rotation = 0;
             let isPanning = false;
             let startX = 0;
             let startY = 0;
 
             function applyTransform() {
-                fullImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
+                fullImage.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale}) rotate(${rotation}deg)`;
+                
+                // Disable tombol jika mencapai batas
+                if(btnZoomIn) btnZoomIn.disabled = scale >= 15;
+                if(btnZoomOut) btnZoomOut.disabled = scale <= 0.5;
             }
 
             function resetZoom() {
                 scale = 1;
                 translateX = 0;
                 translateY = 0;
-                zoomSlider.value = 1;
+                rotation = 0;
                 applyTransform();
             }
 
@@ -594,21 +660,30 @@ const kamus = {
                 }, 300);
             });
 
-            // Kontrol Zoom
-            zoomSlider.addEventListener('input', (e) => {
-                scale = parseFloat(e.target.value);
+            // Putar Kiri
+            btnRotateLeft.addEventListener('click', () => {
+                rotation -= 90;
                 applyTransform();
             });
 
+            // Putar Kanan
+            btnRotateRight.addEventListener('click', () => {
+                rotation += 90;
+                applyTransform();
+            });
+
+            // Reset
+            btnReset.addEventListener('click', () => {
+                resetZoom();
+            });
+
             btnZoomIn.addEventListener('click', () => {
-                scale = Math.min(3, scale + 0.2);
-                zoomSlider.value = scale;
+                scale = Math.min(15, scale + 1.75); // Maksimal 15x, dicapai dalam 8 klik (1.75 per klik)
                 applyTransform();
             });
 
             btnZoomOut.addEventListener('click', () => {
-                scale = Math.max(0.5, scale - 0.2);
-                zoomSlider.value = scale;
+                scale = Math.max(0.5, scale - 1.75);
                 applyTransform();
             });
 
@@ -641,10 +716,9 @@ const kamus = {
             // Tambahan: scroll wheel untuk zoom
             panContainer.addEventListener('wheel', (e) => {
                 e.preventDefault();
-                const delta = e.deltaY * -0.001;
-                const newScale = Math.min(Math.max(0.5, scale + delta), 3);
+                const delta = e.deltaY * -0.003; // Ditingkatkan 3x lipat agar tidak perlu scroll panjang
+                const newScale = Math.min(Math.max(0.5, scale + delta), 15);
                 scale = newScale;
-                zoomSlider.value = scale;
                 applyTransform();
             });
         }

@@ -15,6 +15,14 @@ import { getCollection } from 'astro:content';
 const koleksi = await getCollection('koleksi');
 const semuaMotif = koleksi.map(k => k.data);
 const sampelMotif = semuaMotif.filter(motif => motif && motif['dc:identifier'] && motif['dc:title']);
+
+// Urutkan sampelMotif secara default sesuai dc:identifier agar sama persis dengan urutan awal JS
+sampelMotif.sort((a, b) => {
+    const idA = a['dc:identifier'] || '';
+    const idB = b['dc:identifier'] || '';
+    return idA.localeCompare(idB);
+});
+
 const totalSemua = sampelMotif.length;
 
 // 2. Siapkan Variabel Penghitung Filter (8 Metadata)
@@ -59,7 +67,7 @@ const languageCounts = sampelMotif.reduce((acc, motif) => {
   if(valRaw) {
       valRaw.split(',').forEach(lang => {
           const l = lang.trim();
-          if(l) acc[l] = (acc[l] || 0) + 1;
+          if(l && l.toLowerCase() !== 'id') acc[l] = (acc[l] || 0) + 1;
       });
   }
   return acc;
@@ -98,9 +106,9 @@ const pemetaWarna = sampelMotif.reduce((acc, motif) => {
 
       <div
         id="main-layout-container"
-        class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-start relative transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]"
+        class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-start relative transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)] mt-8 gap-8"
       >
-        <div id="wrapper-galeri" class="w-full md:w-3/4 transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)]">
+        <div id="wrapper-galeri" class="w-full md:w-3/4 transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)]">
           <GalleryGrid sampelMotif={sampelMotif} totalSemua={totalSemua} />
         </div>
 
@@ -155,35 +163,36 @@ const pemetaWarna = sampelMotif.reduce((acc, motif) => {
     html.light-mode .bg-\[\#1e1e1e\] { background-color: #c2bcaf !important; border-color: #a8a296 !important; }
     html.light-mode .btn-hapus-pill { color: #6b6353 !important; }
     
-    /* Tombol Buka/Tutup Filter Spesifik */
-    html.light-mode #btn-toggle-sidebar { background-color: #c2bcaf !important; border-color: #a8a296 !important; color: #2d2a26 !important; }
-    html.light-mode #btn-toggle-sidebar:hover { border-color: #c5a059 !important; background-color: #b0aa9e !important; }
-    
     /* Adaptasi Titik Warna (Swatch) */
     html.light-mode .swatch-aktif {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 2px #ebe4d8, 0 0 0 4px #c5a059 !important;
         border: none !important;
     }
+    
+    html.light-mode .hover-circle-alive:hover {
+        box-shadow: 0 4px 12px rgba(197, 160, 89, 0.4), 0 0 0 2px #ebe4d8, 0 0 0 4px rgba(197, 160, 89, 0.9) !important;
+    }
+    
     html.light-mode .swatch-redup {
         border-color: rgba(0, 0, 0, 0.15) !important;
     }
     
     /* Transisi Halus Perubahan Tema Keseluruhan */
-    html, body, main, #main-layout-container, #wrapper-sidebar, .kartu-motif-test, .bg-\[\#111\], .bg-\[\#161616\], .bg-\[\#050505\] {
+    html, body, main, #main-layout-container, #wrapper-sidebar, .bg-\[\#111\], .bg-\[\#161616\], .bg-\[\#050505\] {
         transition: background-color 1.2s ease-in-out, border-color 1.2s ease-in-out, color 1.2s ease-in-out, box-shadow 1.2s ease-in-out !important;
     }
     
-    /* Kartu Motif */
-    html.light-mode .kartu-motif-test { 
-        background-color: #ebe4d8 !important; 
-        border-color: #d1c8b4 !important; 
-    }
-    html.light-mode .kartu-motif-test:hover {
-        border-color: rgba(197, 160, 89, 0.6) !important;
-        box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+    .kartu-motif-test {
+        transition: background-color 1.2s ease-in-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out, transform 0.2s ease-out !important;
     }
     
-    /* Wadah Gambar di dalam Kartu */
+    /* Kartu Motif */
+html.light-mode .kartu-motif-test {
+    background-color: #ebe4d8 !important;
+    border: 1px solid #d1c8b4 !important;
+}
+
+/* Wadah Gambar di dalam Kartu */
     html.light-mode .bg-\[\#050505\] { background-color: #c2bcaf !important; }
 </style>
 

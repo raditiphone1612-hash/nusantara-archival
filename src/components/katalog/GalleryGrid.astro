@@ -28,8 +28,7 @@ function ekstrakWarnaTitik(stringWarna: string) {
 ---
 
 <div
-    id="wrapper-galeri"
-    class="w-full transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col gap-6"
+    class="w-full transition-all duration-[1200ms] ease-[cubic-bezier(0.25,1,0.5,1)] flex flex-col gap-6"
 >
     <div
         class="w-full bg-[#111] border border-gray-900 rounded-xs px-6 py-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-xl relative transition-all duration-500"
@@ -116,12 +115,13 @@ function ekstrakWarnaTitik(stringWarna: string) {
 
     <div
         id="area-galeri-testing"
-        class="gap-6 columns-1 sm:columns-2 lg:columns-3 xl:columns-4 w-full transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] relative"
+        class="columns-1 sm:columns-2 lg:columns-3 xl:columns-3 gap-6 w-full transition-all duration-700 ease-[cubic-bezier(0.25,1,0.5,1)] relative"
     >
         {
-            sampelMotif.map((motif: any) => (
+            sampelMotif.map((motif: any, index: number) => (
                 <div
-                    class="kartu-motif-test break-inside-avoid mb-6 relative bg-[#111] border border-gray-900 rounded-xs overflow-hidden hover:border-[#c5a059]/30 hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] flex flex-col transition-all duration-300"
+                    class={`kartu-motif-test animate-fade-up-motif relative bg-[#111] border border-gray-900 rounded-xs overflow-hidden flex flex-col mb-6 break-inside-avoid`}
+                    style={`animation-delay: ${index * 75}ms; ${index >= 9 ? "display: none;" : ""}`}
                     data-id={motif['dc:identifier']}
                     data-nama={motif['dc:title'] ? motif['dc:title'].toLowerCase() : ""}
                     data-provinsi={motif['dc:coverage']}
@@ -133,21 +133,26 @@ function ekstrakWarnaTitik(stringWarna: string) {
                     data-rights={motif['dc:rights'] || ""}
                     data-language={motif['dc:language'] || ""}
                 >
-                    <div class="w-full bg-[#050505] p-2 flex items-center justify-center overflow-hidden shrink-0 relative">
+                    <div class="w-full flex items-center justify-center overflow-hidden shrink-0 relative">
                         <img
                             src={motif.url_gambar_web ? `${import.meta.env.BASE_URL}${motif.url_gambar_web}` : `${import.meta.env.BASE_URL}/assets/motif/default.jpg`}
                             alt={motif['dc:title']}
-                            class="w-full h-auto object-cover opacity-90 hover:opacity-100 hover:scale-102 transition-all duration-500 ease-out rounded-xs"
+                            class="w-full h-auto object-cover transition-all duration-500 ease-out rounded-xs"
                             loading="lazy"
+                            decoding="async"
+                            transition:name={`img-${motif['dc:identifier'].replace(/[^a-zA-Z0-9-]/g, '')}`}
                         />
                     </div>
 
-                    <div class="p-5 border-t border-gray-900 flex flex-col flex-grow justify-between bg-[#111]">
+                    <div class="p-5 flex flex-col flex-grow justify-between bg-[#111]">
                         <div>
-                            <span class="hover-text-alive text-[10px] text-[#c5a059] uppercase tracking-[0.2em] block mb-2 font-semibold">
+                            <span class="text-[10px] text-[#c5a059] uppercase tracking-[0.2em] block mb-2 font-semibold">
                                 {motif['dc:coverage']}
                             </span>
-                            <h4 class="hover-text-alive text-base text-gray-200 font-serif leading-tight">
+                            <h4 
+                                class="text-base text-gray-200 font-serif leading-tight"
+                                transition:name={`title-${motif['dc:identifier'].replace(/[^a-zA-Z0-9-]/g, '')}`}
+                            >
                                 {motif['dc:title']}
                             </h4>
                         </div>
@@ -157,7 +162,7 @@ function ekstrakWarnaTitik(stringWarna: string) {
                                 motif['dc:description'] ? motif['dc:description']["Warna Dominan"] : ""
                             ).map((w) => (
                                 <div
-                                    class="swatch-titik-warna hover-circle-alive w-5 h-5 rounded-full border-[1.5px] border-white/20 shadow-sm transition-all duration-300 ease-out"
+                                    class="swatch-titik-warna hover-circle-alive w-6 h-6 rounded-full border-[1.5px] border-white/20 shadow-sm transition-all duration-300 ease-out"
                                     data-warna-nama={w.nama.toLowerCase()}
                                     style={`background-color: ${w.hex};`}
                                     title={w.nama}
@@ -169,4 +174,7 @@ function ekstrakWarnaTitik(stringWarna: string) {
             ))
         }
     </div>
+
+    <!-- Container untuk Pagination -->
+    <div id="pagination-container" class="w-full flex justify-center items-center gap-2 mt-12 mb-8 transition-opacity duration-300"></div>
 </div>

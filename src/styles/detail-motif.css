@@ -93,3 +93,28 @@ html:not(.light-mode) .group:hover .group-hover\:text-white {
     color: #ffd700 !important;
     text-shadow: 0 0 12px rgba(255, 215, 0, 0.4), 0 0 20px rgba(255, 215, 0, 0.2) !important;
 }
+
+/* ========================================================
+   ANIMASI BULATAN WARNA (HOVER)
+   ======================================================== */
+@keyframes circle-pulse {
+    0%, 100% {
+        transform: scale(1.1);
+        box-shadow: 0 0 0px transparent;
+    }
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 20px currentColor;
+        border-color: rgba(255, 255, 255, 0.8);
+    }
+}
+
+.hover-circle-detail {
+    will-change: transform, box-shadow;
+}
+
+.group:hover .hover-circle-detail {
+    animation: circle-pulse 2.5s ease-in-out infinite;
+    position: relative;
+    z-index: 10;
+}

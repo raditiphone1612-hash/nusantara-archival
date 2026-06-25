@@ -7,6 +7,10 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   site: 'https://raditiphone1612-hash.github.io',
   base: '/nusantara-archival',
+  devToolbar: {
+    enabled: false
+  },
+  prefetch: true,
   vite: {
     plugins: [tailwindcss()]
   }

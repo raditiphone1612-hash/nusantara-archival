@@ -23,9 +23,13 @@ document.addEventListener('astro:page-load', initTestKoleksiBatik);
 
 
 function setupSuperSearchAndFilters() {
-    let defaultState = { search: '', provinsi: 'semua', budaya: 'semua', simbolik: 'semua', warna: [], format: 'semua', rights: 'semua', language: 'semua', source: 'semua', urutan: 'default' };
+    const ITEMS_PER_PAGE = 9; // Batasan jumlah kartu per halaman
+    let defaultState = { search: '', provinsi: 'semua', budaya: 'semua', simbolik: 'semua', warna: [], format: 'semua', rights: 'semua', language: 'semua', source: 'semua', urutan: 'default', halamanSekarang: 1 };
+    let isFirstLoad = true;
 
     let state = JSON.parse(sessionStorage.getItem('koleksi_state_v2')) || defaultState;
+    if (!state.halamanSekarang) state.halamanSekarang = 1;
+
     let isSidebarActive = sessionStorage.getItem('sidebar_active_state_v2') === 'true';
 
     const cards = document.querySelectorAll('.kartu-motif-test');
@@ -34,7 +38,7 @@ function setupSuperSearchAndFilters() {
 
     const searchContainer = document.getElementById('search-filter-container');
     const inputPencarian = document.getElementById('input-pencarian-batik');
-    const wrapperToggleBtn = document.getElementById('wrapper-toggle-btn');
+    const btnClearSearch = document.getElementById('btn-clear-search');
     const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
 
     const mainLayoutContainer = document.getElementById('main-layout-container');
@@ -51,60 +55,80 @@ function setupSuperSearchAndFilters() {
     if (inputPencarian) inputPencarian.value = state.search;
     if (selectSort) selectSort.value = state.urutan;
 
-    function updateToggleVisibility() {
-        if (!inputPencarian) return;
-        if (inputPencarian.value.length > 0 || document.activeElement === inputPencarian || searchContainer.matches(':hover') || isSidebarActive) {
-            wrapperToggleBtn.classList.remove('opacity-0', '-translate-y-3', 'pointer-events-none');
-            wrapperToggleBtn.classList.add('opacity-100', 'translate-y-0', 'pointer-events-auto');
-        } else {
-            wrapperToggleBtn.classList.add('opacity-0', '-translate-y-3', 'pointer-events-none');
-            wrapperToggleBtn.classList.remove('opacity-100', 'translate-y-0', 'pointer-events-auto');
-        }
-    }
-
-    if (searchContainer) {
-        searchContainer.addEventListener('mouseenter', updateToggleVisibility);
-        searchContainer.addEventListener('mouseleave', updateToggleVisibility);
-    }
-
     if (inputPencarian) {
-        inputPencarian.addEventListener('focus', updateToggleVisibility);
-        inputPencarian.addEventListener('blur', updateToggleVisibility);
+        // Logika untuk menampilkan/menyembunyikan tombol clear
+        function updateClearButton() {
+            if (!btnClearSearch) return;
+            if (inputPencarian.value.length > 0) {
+                btnClearSearch.classList.remove('opacity-0', 'scale-75', 'pointer-events-none');
+                btnClearSearch.classList.add('opacity-100', 'scale-100', 'pointer-events-auto');
+            } else {
+                btnClearSearch.classList.add('opacity-0', 'scale-75', 'pointer-events-none');
+                btnClearSearch.classList.remove('opacity-100', 'scale-100', 'pointer-events-auto');
+            }
+        }
+
+        // Inisialisasi awal
+        updateClearButton();
+
+        let debounceTimer;
+
+        // Saat diketik
         inputPencarian.addEventListener('input', (e) => {
             state.search = e.target.value.toLowerCase().trim();
+            state.halamanSekarang = 1; // Reset halaman saat mencari
             sessionStorage.setItem('koleksi_state_v2', JSON.stringify(state));
-            updateToggleVisibility();
-            runFilter();
+            updateClearButton();
+            
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                runFilter();
+            }, 300);
         });
-    }
 
+        // Mencegah input kehilangan fokus saat mengklik tombol clear
+        if (btnClearSearch) {
+            btnClearSearch.addEventListener('mousedown', (e) => {
+                e.preventDefault(); // Mencegah tombol mengambil fokus
+            });
+
+            btnClearSearch.addEventListener('click', () => {
+                inputPencarian.value = '';
+                state.search = '';
+                state.halamanSekarang = 1;
+                sessionStorage.setItem('koleksi_state_v2', JSON.stringify(state));
+                updateClearButton();
+                runFilter();
+                inputPencarian.focus(); // Pastikan tetap fokus
+            });
+        }
+    }
+    
+    
     function terapkanLayoutVisualSidebar() {
         if (!mainLayoutContainer || !wrapperSidebar || !wrapperGaleri || !gridArea || !btnToggleSidebar) return;
+        
+        const accordion = document.getElementById('sidebar-content-accordion');
 
         if (isSidebarActive) {
-            mainLayoutContainer.classList.add('gap-8');
-            wrapperSidebar.classList.remove('w-0', 'opacity-0', 'p-0', 'border-0', 'm-0', 'overflow-hidden');
-            wrapperSidebar.classList.add('w-full', 'md:w-1/4', 'opacity-100', 'px-6', 'pt-6', 'pb-56', 'border');
-            wrapperGaleri.classList.remove('w-full');
-            wrapperGaleri.classList.add('md:w-3/4');
-            gridArea.classList.remove('xl:grid-cols-4');
-            btnToggleSidebar.classList.add('text-[#ef4444]', 'border-[#ef4444]/40');
+            if (accordion) {
+                accordion.style.gridTemplateRows = '1fr';
+                accordion.style.opacity = '1';
+                setTimeout(() => accordion.classList.add('is-active'), 50);
+            }
 
-            if (document.getElementById('teks-toggle-filter')) document.getElementById('teks-toggle-filter').innerText = 'Tutup Filter Spesifik';
-            if (document.getElementById('icon-toggle-filter')) document.getElementById('icon-toggle-filter').innerHTML = '<line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>';
+            if (document.getElementById('teks-toggle-filter')) document.getElementById('teks-toggle-filter').innerText = 'Filter Arsip Spesifik';
+            if (document.getElementById('icon-toggle-filter')) document.getElementById('icon-toggle-filter').innerText = '-';
         } else {
-            mainLayoutContainer.classList.remove('gap-8');
-            wrapperSidebar.classList.remove('w-full', 'md:w-1/4', 'opacity-100', 'px-6', 'pt-6', 'pb-56', 'border');
-            wrapperSidebar.classList.add('w-0', 'opacity-0', 'p-0', 'border-0', 'm-0', 'overflow-hidden');
-            wrapperGaleri.classList.remove('md:w-3/4');
-            wrapperGaleri.classList.add('w-full');
-            gridArea.classList.add('xl:grid-cols-4');
-            btnToggleSidebar.classList.remove('text-[#ef4444]', 'border-[#ef4444]/40');
+            if (accordion) {
+                accordion.classList.remove('is-active');
+                accordion.style.gridTemplateRows = '0fr';
+                accordion.style.opacity = '0';
+            }
 
-            if (document.getElementById('teks-toggle-filter')) document.getElementById('teks-toggle-filter').innerText = 'Jelajahi Lebih Spesifik';
-            if (document.getElementById('icon-toggle-filter')) document.getElementById('icon-toggle-filter').innerHTML = '<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>';
+            if (document.getElementById('teks-toggle-filter')) document.getElementById('teks-toggle-filter').innerText = 'Filter Arsip Spesifik';
+            if (document.getElementById('icon-toggle-filter')) document.getElementById('icon-toggle-filter').innerText = '+';
         }
-        updateToggleVisibility();
     }
 
     function paksaBukaSidebar() {
@@ -116,27 +140,33 @@ function setupSuperSearchAndFilters() {
 
     terapkanLayoutVisualSidebar();
 
+    // Filter Sidebar Mobile
+    document.getElementById('btn-reset-filter-mobile')?.addEventListener('click', () => {
+        let isFiltered = state.provinsi !== 'semua' || state.budaya !== 'semua' || state.simbolik !== 'semua' || state.warna.length > 0 || state.format !== 'semua' || state.rights !== 'semua' || state.language !== 'semua' || state.source !== 'semua';
+        
+        if (isFiltered) {
+            showPremiumToast('Filter Dibersihkan', 'Semua filter pencarian telah di-reset.', 'info');
+        }
+
+        state.provinsi = 'semua';
+        state.budaya = 'semua';
+        state.simbolik = 'semua';
+        state.warna = [];
+        state.format = 'semua';
+        state.rights = 'semua';
+        state.language = 'semua';
+        state.source = 'semua';
+        runFilter();
+    });
+
+
     if (btnToggleSidebar) {
         const newBtnToggle = btnToggleSidebar.cloneNode(true);
         btnToggleSidebar.replaceWith(newBtnToggle);
         newBtnToggle.addEventListener('click', () => {
             isSidebarActive = !isSidebarActive;
             sessionStorage.setItem('sidebar_active_state_v2', isSidebarActive ? 'true' : 'false');
-
-            if (!isSidebarActive) {
-                state.provinsi = 'semua';
-                state.budaya = 'semua';
-                state.simbolik = 'semua';
-                state.warna = [];
-                state.format = 'semua';
-                state.rights = 'semua';
-                state.language = 'semua';
-                state.source = 'semua';
-                sessionStorage.setItem('koleksi_state_v2', JSON.stringify(state));
-            }
-
             terapkanLayoutVisualSidebar();
-            runFilter();
         });
     }
 
@@ -149,13 +179,18 @@ function setupSuperSearchAndFilters() {
         let isArsipTerbuka = sessionStorage.getItem('arsip_teknis_state') === 'true';
         
         function updateVisualArsip() {
+            const innerDiv = wadahArsip.querySelector('div');
             if (isArsipTerbuka) {
-                wadahArsip.classList.remove('hidden');
-                wadahArsip.classList.add('flex');
+                wadahArsip.style.gridTemplateRows = '1fr';
+                wadahArsip.style.opacity = '1';
+                setTimeout(() => wadahArsip.classList.add('is-active'), 50);
+                setTimeout(() => { if (innerDiv) innerDiv.style.overflow = 'visible'; }, 800);
                 iconArsip.innerText = '-';
             } else {
-                wadahArsip.classList.remove('flex');
-                wadahArsip.classList.add('hidden');
+                if (innerDiv) innerDiv.style.overflow = 'hidden';
+                wadahArsip.classList.remove('is-active');
+                wadahArsip.style.gridTemplateRows = '0fr';
+                wadahArsip.style.opacity = '0';
                 iconArsip.innerText = '+';
             }
         }
@@ -168,13 +203,18 @@ function setupSuperSearchAndFilters() {
             isArsipTerbuka = !isArsipTerbuka;
             sessionStorage.setItem('arsip_teknis_state', isArsipTerbuka ? 'true' : 'false');
             const curIconArsip = document.getElementById('icon-arsip-teknis');
+            const innerDiv = wadahArsip.querySelector('div');
             if (isArsipTerbuka) {
-                wadahArsip.classList.remove('hidden');
-                wadahArsip.classList.add('flex');
+                wadahArsip.style.gridTemplateRows = '1fr';
+                wadahArsip.style.opacity = '1';
+                setTimeout(() => wadahArsip.classList.add('is-active'), 50);
+                setTimeout(() => { if (innerDiv) innerDiv.style.overflow = 'visible'; }, 800);
                 if(curIconArsip) curIconArsip.innerText = '-';
             } else {
-                wadahArsip.classList.remove('flex');
-                wadahArsip.classList.add('hidden');
+                if (innerDiv) innerDiv.style.overflow = 'hidden';
+                wadahArsip.classList.remove('is-active');
+                wadahArsip.style.gridTemplateRows = '0fr';
+                wadahArsip.style.opacity = '0';
                 if(curIconArsip) curIconArsip.innerText = '+';
             }
         });
@@ -185,6 +225,7 @@ function setupSuperSearchAndFilters() {
     function closeAll() {
         document.querySelectorAll('.custom-options-box').forEach(box => box.classList.add('hidden'));
         document.querySelectorAll('.panah-icon').forEach(p => p.style.transform = 'rotate(0deg)');
+        document.querySelectorAll('.filter-group').forEach(fg => fg.style.zIndex = '');
     }
 
     triggers.forEach(trigger => {
@@ -199,6 +240,8 @@ function setupSuperSearchAndFilters() {
                 if (isHidden) {
                     box.classList.remove('hidden');
                     newTrigger.querySelector('.panah-icon').style.transform = 'rotate(180deg)';
+                    const fg = newTrigger.closest('.filter-group');
+                    if (fg) fg.style.zIndex = '50';
                 }
             });
         }
@@ -210,6 +253,11 @@ function setupSuperSearchAndFilters() {
     // Sorting Logic
     function eksekusiSortingAbjad() {
         if (!gridArea || !state.urutan) return;
+        
+        // JANGAN KOCOK ULANG DOM pada load pertama jika urutannya default,
+        // karena HTML dari Astro sudah diurutkan (mencegah animasi bergeser aneh ke kanan antar kolom).
+        if (isFirstLoad && state.urutan === 'default') return;
+
         const arrayCards = Array.from(cards);
 
         if (state.urutan === 'default') {
@@ -230,6 +278,7 @@ function setupSuperSearchAndFilters() {
         selectSort.removeEventListener('change', () => { });
         selectSort.addEventListener('change', (e) => {
             state.urutan = e.target.value;
+            state.halamanSekarang = 1; // Reset halaman ke 1 saat mengganti urutan
             sessionStorage.setItem('koleksi_state_v2', JSON.stringify(state));
             eksekusiSortingAbjad();
             runFilter();
@@ -238,7 +287,7 @@ function setupSuperSearchAndFilters() {
 
     // Main Filtering Logic
     function runFilter() {
-        let count = 0;
+        let matchedCards = [];
         let liveCounts = { provinsi: {}, budaya: {}, simbolik: {}, warna: {}, format: {}, rights: {}, language: {}, source: {} };
 
         const sedangSorting = state.urutan === 'az' || state.urutan === 'za';
@@ -251,7 +300,8 @@ function setupSuperSearchAndFilters() {
             }
         }
 
-        cards.forEach(card => {
+        const liveCards = gridArea.querySelectorAll('.kartu-motif-test');
+        liveCards.forEach(card => {
             const namaKain = card.getAttribute('data-nama');
             const p = card.getAttribute('data-provinsi');
             const b = card.getAttribute('data-budaya');
@@ -299,88 +349,10 @@ function setupSuperSearchAndFilters() {
             const isMatch = Object.values(criteria).every(Boolean);
 
             if (isMatch) {
-                count++;
-                card.style.display = 'block';
-                setTimeout(() => { card.classList.remove('kartu-missing', 'kartu-hilang'); }, 10);
-
-                const dots = card.querySelectorAll('.swatch-titik-warna');
-                if (state.warna.length > 0) {
-                    dots.forEach(dot => {
-                        const dotName = dot.getAttribute('data-warna-nama');
-                        dot.style.display = state.warna.some(c => c.toLowerCase() === dotName) ? 'block' : 'none';
-                    });
-                } else {
-                    dots.forEach(dot => dot.style.display = 'block');
-                }
-
-                card.style.cursor = 'pointer';
-                card.onclick = (e) => {
-                    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.btn-kembali-cepat')) return;
-                    if (idKainSekarang) {
-                        const a = document.createElement('a');
-                        const base = window.BASE_URL || '';
-                        a.href = `${base}/detail/${idKainSekarang}`; // Redirect back to detail page
-                        document.body.appendChild(a);
-                        a.click();
-                        document.body.removeChild(a);
-                    }
-                };
-
-                if (idAsalKain && idKainSekarang === idAsalKain.replace('test_', '').replace('detail_', '')) {
-                    if (!card.querySelector('.btn-kembali-cepat')) {
-                        const btnKembali = document.createElement('div');
-                        btnKembali.className = "btn-kembali-cepat absolute top-2 right-2 z-30 bg-[#a67c00] text-black text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-lg border border-black/10 hover:bg-white hover:scale-105 transition-all duration-300 cursor-pointer";
-                        btnKembali.innerHTML = `<span>← Kembali ke Detail (Clear Filter)</span>`;
-                        btnKembali.onclick = (e) => {
-                            e.stopPropagation();
-                            let defaultState = { search: '', provinsi: 'semua', budaya: 'semua', simbolik: 'semua', warna: [], format: 'semua', rights: 'semua', language: 'semua', source: 'semua', urutan: 'default' };
-                            sessionStorage.setItem('koleksi_state_v2', JSON.stringify(defaultState));
-                            sessionStorage.setItem('sidebar_active_state_v2', 'false');
-
-                            const a = document.createElement('a');
-                            const base = window.BASE_URL || '';
-                            if (idAsalKain.startsWith('test_') || idAsalKain.startsWith('detail_')) {
-                                const idTarget = idAsalKain.replace('test_', '').replace('detail_', '');
-                                a.href = `${base}/detail/${idTarget}`;
-                            } else {
-                                a.href = `${base}/detail/${idAsalKain}`;
-                            }
-                            document.body.appendChild(a);
-                            a.click();
-                            document.body.removeChild(a);
-                        };
-                        card.classList.add('relative');
-                        card.appendChild(btnKembali);
-                    }
-                }
-
-                // GLOWING TITIK WARNA
-                const titikWarnas = card.querySelectorAll('.swatch-titik-warna');
-                if (state.warna.length === 0) {
-                    titikWarnas.forEach(titik => {
-                        titik.classList.remove('swatch-aktif', 'swatch-redup');
-                        titik.style = `background-color: ${titik.style.backgroundColor}; display: block;`;
-                    });
-                } else {
-                    titikWarnas.forEach(titik => {
-                        const namaTitik = titik.getAttribute('data-warna-nama') || '';
-                        const isColorMatch = state.warna.some(w => namaTitik === w.toLowerCase());
-                        titik.style = `background-color: ${titik.style.backgroundColor}`;
-
-                        if (isColorMatch) {
-                            titik.classList.add('swatch-aktif');
-                            titik.classList.remove('swatch-redup');
-                            titik.style.display = 'block';
-                        } else {
-                            titik.classList.add('swatch-redup');
-                            titik.classList.remove('swatch-aktif');
-                            titik.style.display = 'none';
-                        }
-                    });
-                }
+                matchedCards.push({ card, idKainSekarang, dots: card.querySelectorAll('.swatch-titik-warna') });
             } else {
                 card.classList.add('kartu-hilang');
-                setTimeout(() => { if (card.classList.contains('kartu-hilang')) card.style.display = 'none'; }, 400);
+                card.style.display = 'none'; // Sembunyikan langsung untuk efisiensi
             }
 
             // HITUNG DINAMIS (Hanya tambahkan jika cocok dengan SEMUA KRITERIA LAIN)
@@ -415,8 +387,148 @@ function setupSuperSearchAndFilters() {
                 });
             }
         });
+        isFirstLoad = false;
 
-        if (dashboardTotal) dashboardTotal.innerText = count;
+        if (dashboardTotal) dashboardTotal.innerText = matchedCards.length;
+
+        // PRIORITASKAN MOTIF ASAL (Jika ada idAsalKain, taruh dia di urutan paling pertama agar selalu masuk Halaman 1)
+        const unmatchedCards = Array.from(liveCards).filter(c => !matchedCards.some(m => m.card === c));
+        unmatchedCards.forEach(card => {
+            card.style.display = 'none';
+            card.classList.add('kartu-missing');
+        });
+
+        const text = state.search.toLowerCase();
+        if (text && matchedCards.length > 0) {
+            matchedCards.sort((a, b) => {
+                const titleA = (a.card.getAttribute('data-nama') || '').toLowerCase();
+                const titleB = (b.card.getAttribute('data-nama') || '').toLowerCase();
+                
+                const aExact = titleA === text;
+                const bExact = titleB === text;
+                if (aExact && !bExact) return -1;
+                if (!aExact && bExact) return 1;
+
+                const aStarts = titleA.startsWith(text);
+                const bStarts = titleB.startsWith(text);
+                if (aStarts && !bStarts) return -1;
+                if (!aStarts && bStarts) return 1;
+
+                return 0;
+            });
+        } else if (idAsalKain && !sedangSorting) {
+            const idTarget = idAsalKain.replace('test_', '').replace('detail_', '');
+            const indexAsal = matchedCards.findIndex(m => m.card.getAttribute('data-id') === idTarget);
+            if (indexAsal > 0) {
+                const itemAsal = matchedCards.splice(indexAsal, 1)[0];
+                matchedCards.unshift(itemAsal);
+            }
+        }
+
+        // ==== PAGINATION LOGIC ====
+        const totalPages = Math.ceil(matchedCards.length / ITEMS_PER_PAGE);
+        if (state.halamanSekarang > totalPages && totalPages > 0) state.halamanSekarang = totalPages;
+
+        const startIndex = (state.halamanSekarang - 1) * ITEMS_PER_PAGE;
+        const endIndex = startIndex + ITEMS_PER_PAGE;
+        const paginatedCards = matchedCards.slice(startIndex, endIndex);
+
+        let delay = 0;
+        matchedCards.forEach(({ card, idKainSekarang, dots }) => {
+            const isPaginated = paginatedCards.some(p => p.card === card);
+            
+            if (isPaginated) {
+                card.style.display = 'flex';
+                card.classList.remove('kartu-missing', 'kartu-hilang');
+                
+                // Re-trigger CSS animation if it's not the first load (e.g. user is filtering/paginating)
+                if (!isFirstLoad) {
+                    card.style.animation = 'none';
+                    card.offsetHeight; // Force reflow
+                    card.style.animation = '';
+                    card.style.animationDelay = `${delay}ms`;
+                    card.classList.add('animate-fade-up-motif');
+                    delay += 75;
+                }
+
+                if (state.warna.length > 0) {
+                    dots.forEach(dot => {
+                        const dotName = dot.getAttribute('data-warna-nama');
+                        dot.style.display = state.warna.some(c => c.toLowerCase() === dotName) ? 'block' : 'none';
+                    });
+                } else {
+                    dots.forEach(dot => dot.style.display = 'block');
+                }
+
+                card.style.cursor = 'pointer';
+                card.onclick = (e) => {
+                    if (e.target.closest('button') || e.target.closest('a') || e.target.closest('.btn-kembali-cepat')) return;
+                    if (idKainSekarang) {
+                        const a = document.createElement('a');
+                        const base = window.BASE_URL || '';
+                        a.href = `${base}/detail/${idKainSekarang}`; // Redirect back to detail page
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }
+                };
+
+                if (idAsalKain && idKainSekarang === idAsalKain.replace('test_', '').replace('detail_', '')) {
+                    if (!card.querySelector('.btn-kembali-cepat')) {
+                        const btnKembali = document.createElement('div');
+                        btnKembali.className = "btn-kembali-cepat absolute top-2 right-2 z-30 bg-[#a67c00] text-black text-[10px] font-extrabold px-3 py-1.5 rounded-full shadow-lg border border-black/10 hover:bg-white hover:scale-105 transition-all duration-300 cursor-pointer";
+                        btnKembali.innerHTML = `<span>← Kembali ke Detail (Clear Filter)</span>`;
+                        btnKembali.onclick = (e) => {
+                            e.stopPropagation();
+                            let defaultState = { search: '', provinsi: 'semua', budaya: 'semua', simbolik: 'semua', warna: [], format: 'semua', rights: 'semua', language: 'semua', source: 'semua', urutan: 'default', halamanSekarang: 1 };
+                            sessionStorage.setItem('koleksi_state_v2', JSON.stringify(defaultState));
+                            sessionStorage.setItem('sidebar_active_state_v2', 'false');
+
+                            const a = document.createElement('a');
+                            const base = window.BASE_URL || '';
+                            if (idAsalKain.startsWith('test_') || idAsalKain.startsWith('detail_')) {
+                                const idTarget = idAsalKain.replace('test_', '').replace('detail_', '');
+                                a.href = `${base}/detail/${idTarget}`;
+                            } else {
+                                a.href = `${base}/detail/${idAsalKain}`;
+                            }
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                        };
+                        card.classList.add('relative');
+                        card.appendChild(btnKembali);
+                    }
+                }
+
+                // GLOWING TITIK WARNA
+                if (state.warna.length === 0) {
+                    dots.forEach(titik => {
+                        titik.classList.remove('swatch-aktif', 'swatch-redup');
+                        titik.style = `background-color: ${titik.style.backgroundColor}; display: block;`;
+                    });
+                } else {
+                    dots.forEach(titik => {
+                        const namaTitik = titik.getAttribute('data-warna-nama') || '';
+                        const isColorMatch = state.warna.some(w => namaTitik === w.toLowerCase());
+                        titik.style = `background-color: ${titik.style.backgroundColor}`;
+
+                        if (isColorMatch) {
+                            titik.classList.add('swatch-aktif');
+                            titik.classList.remove('swatch-redup');
+                            titik.style.display = 'block';
+                        } else {
+                            titik.classList.add('swatch-redup');
+                            titik.classList.remove('swatch-aktif');
+                            titik.style.display = 'none';
+                        }
+                    });
+                }
+            } else {
+                card.classList.add('kartu-hilang');
+                card.style.display = 'none';
+            }
+        });
         
         const isFilterActive = Object.entries(state).some(([k, v]) => {
             if(k === 'search' || k === 'urutan') return false;
@@ -448,6 +560,45 @@ function setupSuperSearchAndFilters() {
         });
 
         renderAllPills();
+        renderPaginationUI(totalPages);
+    }
+
+    function renderPaginationUI(totalPages) {
+        const container = document.getElementById('pagination-container');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        if (totalPages <= 1) {
+            container.style.display = 'none';
+            return;
+        }
+        
+        container.style.display = 'flex';
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button');
+            btn.className = `w-10 h-10 rounded-full font-serif font-bold transition-all duration-300 flex items-center justify-center border hover:scale-110 focus:outline-none ` + 
+                (i === state.halamanSekarang 
+                    ? `bg-[#c5a059] text-black border-[#c5a059] shadow-[0_0_15px_rgba(197,160,89,0.5)] cursor-default` 
+                    : `bg-[#111] text-gray-400 border-gray-700 hover:border-[#c5a059] hover:text-[#c5a059] cursor-pointer shadow-lg`);
+            btn.innerText = i;
+            
+            if (i !== state.halamanSekarang) {
+                btn.onclick = () => {
+                    state.halamanSekarang = i;
+                    sessionStorage.setItem('koleksi_state_v2', JSON.stringify(state));
+                    runFilter();
+                    
+                    const wrapper = document.getElementById('wrapper-galeri');
+                    if (wrapper) {
+                        const yOffset = -120; 
+                        const y = wrapper.getBoundingClientRect().top + window.scrollY + yOffset;
+                        window.scrollTo({top: y, behavior: 'smooth'});
+                    }
+                };
+            }
+            container.appendChild(btn);
+        }
     }
 
     function renderAllPills() {
@@ -468,6 +619,7 @@ function setupSuperSearchAndFilters() {
                 pill.querySelector('.btn-hapus-pill').addEventListener('click', (e) => {
                     e.stopPropagation();
                     if (kategori === 'warna') { state.warna = state.warna.filter(i => i !== item); } else { state[kategori] = 'semua'; }
+                    state.halamanSekarang = 1;
                     sessionStorage.setItem('koleksi_state_v2', JSON.stringify(state));
                     runFilter();
                 });
@@ -478,21 +630,112 @@ function setupSuperSearchAndFilters() {
         });
     }
 
+        // Fungsi Toast Interaktif Premium (General)
+        function showPremiumToast(title, message, type = 'warning') {
+            const existingToast = document.getElementById('premium-toast-warning');
+            if (existingToast) existingToast.remove();
+    
+            const toast = document.createElement('div');
+            toast.id = 'premium-toast-warning';
+            
+            const isLightMode = document.documentElement.classList.contains('light-mode');
+            
+            toast.className = `fixed bottom-10 left-1/2 transform -translate-x-1/2 px-5 py-4 rounded-2xl z-[9999] flex items-center gap-4 backdrop-blur-xl border transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] scale-90 translate-y-12 opacity-0 cursor-pointer shadow-2xl`;
+            
+            let iconSvg = '';
+            let titleColor = isLightMode ? 'text-[#b08d4b]' : 'text-[#c5a059]';
+            let iconBg = isLightMode ? 'rgba(176, 141, 75, 0.15)' : 'rgba(197, 160, 89, 0.15)';
+
+            if (type === 'warning') {
+                iconSvg = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>`;
+            } else if (type === 'info') {
+                // Ikon tempat sampah / bersihkan
+                iconSvg = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>`;
+            } else if (type === 'success') {
+                iconSvg = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>`;
+            }
+
+            if(isLightMode) {
+                 toast.style.backgroundColor = 'rgba(235, 228, 216, 0.85)';
+                 toast.style.borderColor = 'rgba(176, 141, 75, 0.4)';
+                 toast.style.color = '#1a1a1a';
+                 toast.style.boxShadow = '0 20px 40px -10px rgba(0,0,0,0.15)';
+            } else {
+                 toast.style.backgroundColor = 'rgba(15, 15, 15, 0.85)';
+                 toast.style.borderColor = 'rgba(197, 160, 89, 0.3)';
+                 toast.style.color = '#fff';
+                 toast.style.boxShadow = '0 20px 40px -10px rgba(0,0,0,0.6)';
+            }
+    
+            toast.innerHTML = `
+                <div class="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-transform duration-300 hover:scale-110" style="background: ${iconBg}">
+                    <svg class="w-5 h-5 ${titleColor}" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        ${iconSvg}
+                    </svg>
+                </div>
+                <div class="flex flex-col">
+                    <h4 class="font-serif text-[15px] font-bold tracking-wide ${titleColor} leading-none mb-1">${title}</h4>
+                    <p class="text-[13px] font-sans opacity-80 leading-snug">${message}</p>
+                </div>
+            `;
+    
+            document.body.appendChild(toast);
+    
+            // Animasi masuk (muncul dengan pantulan)
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    toast.classList.remove('scale-90', 'translate-y-12', 'opacity-0');
+                    toast.classList.add('scale-100', 'translate-y-0', 'opacity-100');
+                });
+            });
+    
+            // Fungsi menutup toast
+            const dismissToast = () => {
+                toast.classList.remove('scale-100', 'translate-y-0', 'opacity-100');
+                toast.classList.add('scale-90', 'translate-y-12', 'opacity-0');
+                setTimeout(() => toast.remove(), 500);
+            };
+    
+            // Hilangkan jika diklik
+            toast.addEventListener('click', dismissToast);
+    
+            // Hilangkan otomatis setelah 4 detik
+            setTimeout(() => {
+                if (document.body.contains(toast)) dismissToast();
+            }, 4000);
+        }
+
     document.querySelectorAll('.baris-opsi').forEach(btn => { btn.replaceWith(btn.cloneNode(true)); });
     document.querySelectorAll('.baris-opsi').forEach(btn => {
         btn.addEventListener('click', () => {
             const kategori = btn.getAttribute('data-kategori');
             const target = btn.getAttribute('data-target');
             if (kategori === 'warna') {
-                if (target === 'semua') { state.warna = []; closeAll(); }
+                if (target === 'semua') { 
+                    if (state.warna.length > 0) {
+                        showPremiumToast('Filter Dibersihkan', 'Semua warna pilihan telah di-reset.', 'info');
+                    }
+                    state.warna = []; 
+                    closeAll(); 
+                }
                 else {
                     if (state.warna.includes(target)) { state.warna = state.warna.filter(i => i !== target); }
-                    else { if (state.warna.length >= 3) { alert("Maksimal memilih 3 warna sekaligus!"); return; } state.warna.push(target); }
+                    else { 
+                        if (state.warna.length >= 6) { 
+                            showPremiumToast('Peringatan Kuota', 'Anda maksimal hanya bisa mencampur 6 warna sekaligus!', 'warning'); 
+                            return; 
+                        } 
+                        state.warna.push(target); 
+                    }
                 }
             } else {
+                if (target === 'semua' && state[kategori] !== 'semua') {
+                    showPremiumToast('Filter Dibersihkan', 'Filter kategori ini telah di-reset.', 'info');
+                }
                 state[kategori] = target; closeAll();
             }
 
+            state.halamanSekarang = 1;
             sessionStorage.setItem('koleksi_state_v2', JSON.stringify(state));
             runFilter();
         });
@@ -513,10 +756,48 @@ function setupSuperSearchAndFilters() {
     }
 
     if (adaQueryEksternal) {
+        state.halamanSekarang = 1;
         sessionStorage.setItem('koleksi_state_v2', JSON.stringify(state));
         paksaBukaSidebar();
+        
+        // Gulir ke atas otomatis
+        setTimeout(() => {
+            const wrapper = document.getElementById('wrapper-galeri');
+            if (wrapper) {
+                const yOffset = -120;
+                const y = wrapper.getBoundingClientRect().top + window.scrollY + yOffset;
+                window.scrollTo({top: y, behavior: 'smooth'});
+            }
+        }, 300);
     }
 
-    eksekusiSortingAbjad();
-    runFilter();
+    // Tunda eksekusi DOM berat agar tidak memblokir render animasi View Transitions (menyelesaikan patah-patah/stutter)
+    setTimeout(() => {
+        eksekusiSortingAbjad();
+        runFilter();
+    }, 50);
 }
+
+// Perbaiki Animasi View Transitions saat kembali ke Koleksi
+document.addEventListener('astro:before-swap', (ev) => {
+    const url = ev.to;
+    if (url.pathname.includes('/koleksi')) {
+        const asal = url.searchParams.get('asal');
+        if (asal && asal.startsWith('detail_')) {
+            const id = asal.replace('detail_', '');
+            const targetCard = ev.newDocument.querySelector(`[data-id-kain="${id}"]`);
+            if (targetCard) {
+                // Tampilkan card agar View Transitions bisa melakukan morphing
+                targetCard.style.display = 'flex';
+                targetCard.classList.remove('hidden');
+                
+                // Pindahkan langsung ke urutan pertama di DOM baru (sebelum browser mengambil snapshot)
+                // Ini memastikan arah terbangnya (morph) pas ke posisi awal grid!
+                const gridArea = ev.newDocument.getElementById('area-galeri-testing');
+                if (gridArea) {
+                    gridArea.insertBefore(targetCard, gridArea.firstChild);
+                }
+            }
+        }
+    }
+});
